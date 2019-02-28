@@ -1,0 +1,15 @@
+﻿@{ 
+    ViewData["Title"] = "Online Converter";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Office to PDF Converter Page</h1>
+</div>
+
+<div class="list-group mt-5">
+    <a class="list-group-item list-group-item-action justify-content-between align-items-center" asp-area="" asp-controller="Convert" asp-action="Word">Word to PDF <img class="float-right" width="32" height="32" src="~/images/word-icon.png" /></a>
+
+    <a class="list-group-item list-group-item-action justify-content-between align-items-center" asp-area="" asp-controller="Convert" asp-action="PowerPoint">PowerPoint to PDF <img class="float-right" width="32" height="32" src="~/images/powerpoint-icon.png" /></a>
+
+    <a class="list-group-item list-group-item-action justify-content-between align-items-center" asp-area="" asp-controller="Convert" asp-action="Excel">Excel to PDF <img class="float-right" width="32" height="32" src="~/images/excel-icon.png" /></a>
+</div>
