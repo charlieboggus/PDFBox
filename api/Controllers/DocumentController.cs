@@ -75,7 +75,7 @@ namespace PDFBox.Api.Controllers
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            db.Documents.Add(doc);
+            await db.Documents.AddAsync(doc);
             await db.SaveChangesAsync();
 
             return CreatedAtAction("GetDocument", new { id = doc.Id}, doc);

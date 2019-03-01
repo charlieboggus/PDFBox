@@ -9,16 +9,17 @@ namespace PDFBox.Api.Models
 {
     public class Document
     {
-
-        [Required]
         public int OwnerId { get; set; }
 
         public int Id { get; set; }
 
+        [Required]
         public string Name { get; set; }
 
+        [Required]
         public int Size { get; set; }
 
+        [Required]
         public DateTime DateCreated { get; set; }
 
         // TODO: Document data -- byte[] maybe? figure out how to store PDF docs...
