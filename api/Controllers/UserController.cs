@@ -2,13 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 using PDFBox.Api.Data;
 using PDFBox.Api.Models;
 
 namespace PDFBox.Api.Controllers
 {
+    [Authorize]
     [Route("api/users")]
     [ApiController]
     public class UserController : ControllerBase
@@ -18,6 +25,32 @@ namespace PDFBox.Api.Controllers
         public UserController(UserContext db)
         {
             this.db = db;
+        }
+
+        // POST: api/users/authenticate
+        [AllowAnonymous]
+        [HttpPost, Route("authenticate")]
+        public IActionResult Authenticate([FromBody] LoginModel login)
+        {
+            if(login == null)
+                return BadRequest("Invalid Client Request");
+            
+            var usr = db.Users.SingleOrDefault(u => (u.Username.Equals(login.Username) && u.Password.Equals(login.Password)));
+            if(usr != null)
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = new JwtSecurityToken(
+                    signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes("XRhPGhn7YeFj2j3THmxRKdCTTZVhUq")), SecurityAlgorithms.HmacSha256),
+                    expires: DateTime.Now.AddMinutes(5),
+                    claims: new Claim[] { new Claim(ClaimTypes.Name, usr.UserId.ToString()) }
+                );
+                var tokenStr = tokenHandler.WriteToken(token);
+
+                usr.Token = tokenStr;
+                return Ok(usr);
+            }
+            else
+                return Unauthorized();
         }
 
         // GET: api/users/
@@ -68,8 +101,9 @@ namespace PDFBox.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/users/
-        [HttpPost]
+        // POST: api/users/register
+        [AllowAnonymous]
+        [HttpPost, Route("register")]
         public async Task< IActionResult > Post([FromBody] User usr)
         {
             if(!ModelState.IsValid)

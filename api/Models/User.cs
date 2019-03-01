@@ -22,7 +22,8 @@ namespace PDFBox.Api.Models
         [Required]
         public string Username { get; set; }
 
-        [Required]
         public DateTime RegistrationDate { get; set; }
+
+        public string Token { get; set; }
     }
 }

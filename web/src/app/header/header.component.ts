@@ -1,20 +1,24 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+
+import { AuthenticationService } from '../services/authentication.service';
+import { User } from '../models/user';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent implements OnInit, OnDestroy {
+export class HeaderComponent {
 
-  loggedIn: boolean;
+  currentUser: User;
 
-  constructor() { }
-
-  ngOnInit() {
-    this.loggedIn = false;
+  constructor(private router: Router, private authService: AuthenticationService) {
+    this.authService.currentUser.subscribe(x => this.currentUser = x);
   }
 
-  ngOnDestroy() {
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }
