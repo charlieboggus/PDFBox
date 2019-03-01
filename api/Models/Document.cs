@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PDFBox.Api.Models
 {
+    // Document model
     public class Document
     {
         public int OwnerId { get; set; }
