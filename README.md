@@ -3,6 +3,9 @@
 
 - **Project Name:** PDFBox
 
-- **Project Demo Link:** [TBA](#)
+- **Project Demo:** [TBA](#)
 # Project Description:
 TBA
+
+# Misc.:
+This project's web frontend was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.3.3.
