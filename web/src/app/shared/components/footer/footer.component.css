@@ -1,0 +1,9 @@
+#pageFooter {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    white-space: nowrap;
+    height: 50px;
+    line-height: 50px;
+    background-color: white;
+}

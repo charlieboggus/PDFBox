@@ -1,8 +1,9 @@
-#page-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    white-space: nowrap;
-    height: 60px;
-    line-height: 60px;
+#pageBody {
+    margin-top: 80px;
+    margin-bottom: 50px;
+}
+
+#pageBody:after {
+    content: "";
+    display: block;
 }

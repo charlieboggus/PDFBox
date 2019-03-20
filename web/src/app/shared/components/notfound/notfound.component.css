@@ -1,0 +1,33 @@
+@import 'https://fonts.googleapis.com/css?family=IBM+Plex+Mono';
+
+#notfound {
+    position: relative;
+    height: 100vh - 80px - 50px;
+    transform: translateY(100%);
+}
+
+#notfound-404 h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 100px;
+    font-weight: 700;
+    color: #333;
+    line-height: 50px;
+    height: 50px;
+    margin-bottom: 30px;
+}
+
+#notfound-content h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 33px;
+    font-weight: 700;
+    color: #333;
+    letter-spacing: 7px;
+    margin-bottom: 20px;
+}
+
+#notfound-content p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 16px;
+    font-weight: 400;
+    color: #333;
+}

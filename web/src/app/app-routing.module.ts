@@ -1,15 +1,11 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-
-import { HomeComponent } from './home/home.component';
-import { PrivacyComponent } from './privacy/privacy.component';
-import { FaqComponent } from './faq/faq.component';
+import { NotfoundComponent } from './shared/components/notfound/notfound.component';
 
 const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'index', component: HomeComponent},
-  { path: 'privacy', component: PrivacyComponent },
-  { path: 'faq', component: FaqComponent }
+  { path: 'home',  loadChildren: './modules/home/home.module#HomeModule' }, // Home Module routing
+  { path: 'notfound', component: NotfoundComponent },                       // 404 Not Found page routing
+  { path: '**', component: NotfoundComponent }                              // Any route not specified above will go to the 404 Not Found page
 ];
 
 @NgModule({

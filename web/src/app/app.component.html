@@ -1,35 +1,10 @@
 <!-- Global Navigation Bar -->
-<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3 fixed-top">
-  <a class="navbar-brand" routerLink="/index">PDFBox</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="collapse"><span class="navbar-toggler-icon"></span></button>
-  <div class="collapse navbar-collapse d-sm-inline-flex flex-sm-row-reverse">
-    <!-- Login & Register links if user is not logged in -->
-    <!-- TODO: THIS -->
-
-    <!-- Dashboard & Logout links if user is logged in -->
-    <!-- TODO: THIS -->
-
-    <!-- Global navigation bar links -->
-    <ul class="navbar-nav flex-grow-1">
-      <li class="nav-item"><a class="nav-link text-light" routerLink="/index">Home</a></li>
-      <li class="nav-item"><a class="nav-link text-light" routerLink="/index">Convert</a></li>
-    </ul>
-  </div>
-</nav>
+<app-navbar></app-navbar>
 
 <!-- Page body -->
-<div class="container" style="margin-top: 80px">
+<div class="container" id="pageBody">
   <router-outlet></router-outlet>
 </div>
 
 <!-- Global page footer -->
-<footer class="border-top text-muted" id="page-footer">
-  <div class="container">
-      <div class="float-left" id="footer-copyright">&copy; 2019 PDFBox</div>
-      <div class="float-right" id="footer-links">
-          <a routerLink="/privacy">Privacy</a>
-           - 
-          <a routerLink="/faq">FAQ</a>
-      </div>
-  </div>
-</footer>
+<app-footer></app-footer>

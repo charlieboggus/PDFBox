@@ -1,0 +1,43 @@
+<div class="row align-items-center justify-content-center w-100">
+  <div class="col-md-6 text-center my-auto">
+    <!-- Alerts -->
+    <!-- TODO: Alert for when message was successfully sent -->
+    <!-- TODO: Alert for when message send failure -->
+
+    <!-- Contact Form -->
+    <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="border border-light p-4 rounded shadow">
+      <!-- Form Header -->
+      <h4 class="text-center mb-4">Contact us</h4>
+
+      <!-- Name input field -->
+      <div class="form-group">
+        <input class="form-control" type="text" placeholder="Name" formControlName="name" [ngClass]="{ 'is-invalid': (submitted && form.name.errors) || ((form.name.dirty || form.name.touched) && form.name.errors) }" />
+        <div *ngIf="(submitted && form.name.errors) || (form.name.dirty || form.name.touched)" class="invalid-feedback text-left">
+          <div *ngIf="form.name.errors.required">Name is required.</div>
+        </div>
+      </div>
+
+      <!-- Email input field -->
+      <div class="form-group">
+        <input class="form-control" type="email" placeholder="Email" formControlName="email" [ngClass]="{ 'is-invalid': (submitted && form.email.errors) || ((form.email.dirty || form.email.touched) && form.email.errors) }" />
+        <div *ngIf="(submitted && form.email.errors) || (form.email.dirty || form.email.touched)" class="invalid-feedback text-left">
+          <div *ngIf="form.email.errors.required">Email is required.</div>
+          <div *ngIf="form.email.errors.email">Email must be a valid email address.</div>
+        </div>
+      </div>
+
+      <!-- Message box input field -->
+      <div class="form-group">
+        <textarea class="form-control" rows="5" placeholder="Enter your message..." formControlName="message" [ngClass]="{ 'is-invalid': (submitted && form.message.errors) || ((form.message.dirty || form.message.touched) && form.message.errors) }"></textarea>
+        <div *ngIf="(submitted && form.message.errors) || (form.message.dirty || form.message.touched)" class="invalid-feedback text-left">
+          <div *ngIf="form.message.errors.required">Messsage is required</div>
+        </div>
+      </div>
+
+      <!-- TODO: maybe add ReCaptcha? -->
+
+      <!-- Submission button -->
+      <button type="submit" class="btn btn-dark btn-block mb-2 text-light" [disabled]="contactForm.invalid">Submit</button>
+    </form>
+  </div>
+</div>
