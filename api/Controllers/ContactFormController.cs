@@ -29,9 +29,9 @@ namespace PDFBox.Api.Controllers
 
         private bool SendMail(ContactForm form)
         {
-            using(var message = new MailMessage(form.Email, "charlie.boggus@gmail.com"))    // TODO: change to webmaster@pdfbox.com or whatever
+            using(var message = new MailMessage(form.Email, "webmaster@pdfbox.com"))
             {
-                message.To.Add(new MailAddress("charlie.boggus@gmail.com"));                // TODO: change to webmaster@pdfbox.com or whatever
+                message.To.Add(new MailAddress("webmaster@pdfbox.com"));
                 message.From = new MailAddress(form.Email);
                 message.Subject = "PDFBox: New Contact Form Submission from " + form.Name;
 
@@ -55,7 +55,7 @@ namespace PDFBox.Api.Controllers
                     client.Send(message);
                     return true;
                 }
-                catch (Exception e) {
+                catch (Exception) {
                     return false;
                 }
             }
