@@ -7,5 +7,5 @@
 # Project Description:
 TBA
 
-# Misc.:
+# Misc:
 This project's web frontend was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.3.3.
