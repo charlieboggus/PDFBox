@@ -12,6 +12,7 @@ import { FaqComponent } from './components/faq/faq.component';
 import { ContactComponent } from './components/contact/contact.component';
 
 // Services
+import { ContactService } from './services/contact.service';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,7 @@ import { ContactComponent } from './components/contact/contact.component';
     HomeRoutingModule
   ],
   providers: [
-
+    ContactService
   ]
 })
 export class HomeModule { }
