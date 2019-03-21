@@ -33,7 +33,7 @@ namespace PDFBox.Api
         public void ConfigureServices(IServiceCollection services)
         {
             // Create the Database Contexts
-            services.AddDbContext< PDFBoxContext >(options => options.UseInMemoryDatabase("Users"));    // TODO: use a different database (PostgreSQL maybe?)
+            services.AddDbContext< PDFBoxContext >(options => options.UseInMemoryDatabase("pdfbox"));    // TODO: use a different database (PostgreSQL maybe?)
 
             // Configure JWT authentication for user accounts
             services.AddAuthentication(options => 
