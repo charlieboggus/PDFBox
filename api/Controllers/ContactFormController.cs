@@ -1,10 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Net;
 using System.Net.Mail;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using PDFBox.Api.Models;
 
@@ -15,36 +11,29 @@ namespace PDFBox.Api.Controllers
     public class ContactFormController : ControllerBase
     {
         [HttpPost]
-        public IActionResult SubmitContactForm([FromBody] ContactForm form)
+        public IActionResult SubmitForm([FromBody] ContactForm form)
         {
             if(!ModelState.IsValid)
             {
-                return Ok(new { success = false });
+                return BadRequest(new { success = false });
             }
 
-            var result = this.SendMail(form);
-
-            return Ok(new { success = result });
-        }
-
-        private bool SendMail(ContactForm form)
-        {
-            using(var message = new MailMessage(form.Email, "webmaster@pdfbox.com"))
+            using(var message = new MailMessage("contact@pdfbox.com", "webmaster@pdfbox.com"))
             {
+                // Configure the message to send
                 message.To.Add(new MailAddress("webmaster@pdfbox.com"));
-                message.From = new MailAddress(form.Email);
+                message.From = new MailAddress("contact@pdfbox.com");
                 message.Subject = "PDFBox: New Contact Form Submission from " + form.Name;
-
-                // Format the mail body
                 string mailBody = 
-                    "New contact form submission from PDFBox:\n\n" + 
+                    "Submission Details:\n" + 
+                    "-----------------------------------------------------------\n" +
                     "Name: " + form.Name + "\n" +
-                    "Email: " + form.Email + "\n\n" +
+                    "Email: " + form.Email + "\n" +
                     "Message: \n" +
-                    form.Message + "\n";
-
+                    "\t" + form.Message + "\n";
                 message.Body = mailBody;
 
+                // Configure SMTP client
                 var client = new SmtpClient("smtp.mailtrap.io", 2525)                       // TODO: get a real smtp client maybe?
                 {
                     Credentials = new NetworkCredential("60de777dc8ec71", "2bc0fe69516b17"),
@@ -52,11 +41,15 @@ namespace PDFBox.Api.Controllers
                 };
 
                 try {
+                    // Send the email
                     client.Send(message);
-                    return true;
+
+                    // Then return HTTP Ok with success = true
+                    return Ok(new { success = true });
                 }
-                catch (Exception) {
-                    return false;
+                catch (Exception e) {
+                    // If something goes wrong return HTTP Ok with success = false and the error message
+                    return Ok(new { success = false, error = e.Message });
                 }
             }
         }
