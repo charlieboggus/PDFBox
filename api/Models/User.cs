@@ -11,7 +11,7 @@ namespace PDFBox.Api.Models
     public class User
     {
         [Required]
-        public int UserId { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public string Email { get; set; }
@@ -24,6 +24,6 @@ namespace PDFBox.Api.Models
 
         public DateTime RegistrationDate { get; set; }
 
-        public string Token { get; set; }
+        public List< Document > Documents { get; set; }
     }
 }

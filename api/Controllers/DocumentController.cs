@@ -13,21 +13,21 @@ namespace PDFBox.Api.Controllers
     [ApiController]
     public class DocumentController : ControllerBase
     {
-        private readonly DocumentContext db;
+        private readonly PDFBoxContext db;
 
-        public DocumentController(DocumentContext db)
+        public DocumentController(PDFBoxContext db)
         {
             this.db = db;
         }
 
-        // GET: api/documents/
+        // HTTP GET: api/documents/
         [HttpGet]
         public IEnumerable< Document > Get()
         {
             return db.Documents;
         }
 
-        // GET: api/documents/{id}
+        // HTTP GET: api/documents/{id}
         [HttpGet("{id}", Name = "GetDocument")]
         public async Task< IActionResult > GetDocument([FromRoute] int id)
         {
@@ -41,7 +41,7 @@ namespace PDFBox.Api.Controllers
             return Ok(doc);
         }
 
-        // PUT: api/documents/{id}
+        // HTTP PUT: api/documents/{id}
         [HttpPut("{id}")]
         public async Task< IActionResult > Put([FromRoute] int id, [FromBody] Document doc)
         {
@@ -68,7 +68,7 @@ namespace PDFBox.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/documents/
+        // HTTP POST: api/documents/
         [HttpPost]
         public async Task< IActionResult > Post([FromBody] Document doc)
         {
@@ -81,7 +81,7 @@ namespace PDFBox.Api.Controllers
             return CreatedAtAction("GetDocument", new { id = doc.Id}, doc);
         }
 
-        // DELETE: api/documents/{id}
+        // HTTP DELETE: api/documents/{id}
         [HttpDelete("{id}")]
         public async Task< IActionResult > Delete([FromRoute] int id)
         {

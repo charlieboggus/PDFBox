@@ -20,68 +20,42 @@ namespace PDFBox.Api.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UserContext db;
+        private readonly PDFBoxContext db;
 
-        public UserController(UserContext db)
+        public UserController(PDFBoxContext db)
         {
             this.db = db;
         }
 
-        // POST: api/users/authenticate
-        [AllowAnonymous]
-        [HttpPost, Route("authenticate")]
-        public IActionResult Authenticate([FromBody] LoginModel login)
-        {
-            if(login == null)
-                return BadRequest("Invalid Client Request");
-            
-            var usr = db.Users.SingleOrDefault(u => (u.Username.Equals(login.Username) && u.Password.Equals(login.Password)));
-            if(usr != null)
-            {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var token = new JwtSecurityToken(
-                    signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes("XRhPGhn7YeFj2j3THmxRKdCTTZVhUq")), SecurityAlgorithms.HmacSha256),
-                    expires: DateTime.Now.AddMinutes(5),
-                    claims: new Claim[] { new Claim(ClaimTypes.Name, usr.UserId.ToString()) }
-                );
-                var tokenStr = tokenHandler.WriteToken(token);
-
-                usr.Token = tokenStr;
-                return Ok(usr);
-            }
-            else
-                return Unauthorized();
-        }
-
-        // GET: api/users/
+        // HTTP GET: api/users/
         [HttpGet]
         public IEnumerable< User > Get()
         {
             return db.Users;
         }
 
-        // GET: api/users/{id}
+        // HTTP GET: api/users/{id}
         [HttpGet("{id}", Name = "GetUser")]
         public async Task< IActionResult > GetUser([FromRoute] int id)
         {
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var usr = await db.Users.SingleOrDefaultAsync(u => u.UserId == id);
+            var usr = await db.Users.SingleOrDefaultAsync(u => u.Id == id);
             if(usr == null)
                 return NotFound();
 
             return Ok(usr);
         }
 
-        // PUT: api/users/{id}
+        // HTTP PUT: api/users/{id}
         [HttpPut("{id}")]
         public async Task< IActionResult > Put([FromRoute] int id, [FromBody] User usr)
         {
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
             
-            if(id != usr.UserId)
+            if(id != usr.Id)
                 return BadRequest();
 
             db.Entry(usr).State = EntityState.Modified;
@@ -112,8 +86,11 @@ namespace PDFBox.Api.Controllers
             await db.Users.AddAsync(usr);
             await db.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = usr.UserId }, usr);
+            return CreatedAtAction("GetUser", new { id = usr.Id }, usr);
         }
+
+        // HTTP POST: api/users/auth
+        // TODO: Authentication method
 
         // DELETE: api/users/{id}
         [HttpDelete("{id}")]
@@ -122,7 +99,7 @@ namespace PDFBox.Api.Controllers
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var usr = await db.Users.SingleOrDefaultAsync(u => u.UserId == id);
+            var usr = await db.Users.SingleOrDefaultAsync(u => u.Id == id);
             if(usr == null)
                 return NotFound();
             
@@ -134,7 +111,7 @@ namespace PDFBox.Api.Controllers
 
         private bool UserExists(int id)
         {
-            return db.Users.Any(e => e.UserId == id);
+            return db.Users.Any(e => e.Id == id);
         }
     }
 }

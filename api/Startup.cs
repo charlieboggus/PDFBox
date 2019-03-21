@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+
 using PDFBox.Api.Data;
 
 namespace PDFBox.Api
@@ -32,10 +33,9 @@ namespace PDFBox.Api
         public void ConfigureServices(IServiceCollection services)
         {
             // Create the Database Contexts
-            services.AddDbContext< UserContext >(options => options.UseInMemoryDatabase("Users"));
-            services.AddDbContext< DocumentContext >(options => options.UseInMemoryDatabase("Documents"));
+            services.AddDbContext< PDFBoxContext >(options => options.UseInMemoryDatabase("Users"));    // TODO: use a different database (PostgreSQL maybe?)
 
-            // Configure JWT authentication
+            // Configure JWT authentication for user accounts
             services.AddAuthentication(options => 
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
