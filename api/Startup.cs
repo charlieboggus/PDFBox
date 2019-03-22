@@ -62,7 +62,7 @@ namespace PDFBox.Api
         {
             if (env.IsDevelopment()) { app.UseDeveloperExceptionPage(); } else { app.UseHsts(); }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials());
             app.UseAuthentication();
             app.UseMvc();
