@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PDFBox.Api.Models
 {
-    public class ContactForm
+    // Data Transfer Object (DTO) that represents the contact form data sent from the users (contact page) to the API
+    public class ContactFormDto
     {
         [Required]
         public string Name { get; set; }
