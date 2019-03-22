@@ -10,6 +10,9 @@ import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 
+// Services
+import { AccountService } from './services/account.service';
+
 @NgModule({
   declarations: [
     LoginComponent, 
@@ -21,6 +24,9 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
     FormsModule,
     ReactiveFormsModule,
     AccountRoutingModule
+  ],
+  providers: [
+    AccountService
   ]
 })
 export class AccountModule { }

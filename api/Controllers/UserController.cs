@@ -177,8 +177,11 @@ namespace PDFBox.Api.Controllers
             if (user == null)
                 return BadRequest(new { message = "User not found" });
 
+            if (string.IsNullOrEmpty(newData.Username) && string.IsNullOrEmpty(newData.Email) && string.IsNullOrEmpty(newData.Password))
+                return BadRequest(new { message = "No new account data entered" });
+
             // Username update (if it was entered)
-            if (!string.IsNullOrWhiteSpace(newData.Username) && (newData.Username != user.Username))
+            if (!string.IsNullOrEmpty(newData.Username) && (newData.Username != user.Username))
             {
                 // Check if new username is taken
                 var usernameTaken = await db.Users.AnyAsync(x => x.Username == newData.Username);
@@ -190,7 +193,7 @@ namespace PDFBox.Api.Controllers
             }
 
             // Email update (if it was entered)
-            if (!string.IsNullOrWhiteSpace(newData.Email) && (newData.Email != user.Email))
+            if (!string.IsNullOrEmpty(newData.Email) && (newData.Email != user.Email))
             {
                 // Check if new email is taken
                 var emailTaken = await db.Users.AnyAsync(x => x.Email == newData.Email);
@@ -202,7 +205,7 @@ namespace PDFBox.Api.Controllers
             }
 
             // Password Update (if it was entered)
-            if(!string.IsNullOrWhiteSpace(newData.Password))
+            if(!string.IsNullOrEmpty(newData.Password))
             {
                 // Create hash & salt for new password
                 byte[] passwordHash;
