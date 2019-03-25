@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 
 import { AuthenticationService } from '../../../../shared/services/authentication.service';
+import { AlertService } from 'src/app/shared/services/alert.service';
 
 @Component({
   selector: 'app-login',
@@ -16,10 +17,8 @@ export class LoginComponent implements OnInit {
   loading = false;
   submitted = false;
   returnUrl: string;
-  message: string;
-  error: boolean;
 
-  constructor(private builder: FormBuilder, private route: ActivatedRoute, private router: Router, private auth: AuthenticationService) { }
+  constructor(private builder: FormBuilder, private route: ActivatedRoute, private router: Router, private auth: AuthenticationService, private alerts: AlertService) { }
 
   ngOnInit() {
     this.loginForm = this.builder.group({
@@ -35,19 +34,20 @@ export class LoginComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
+    this.loading = true;
 
     if(this.loginForm.invalid) {
+      this.loading = false;
       return;
     }
 
-    this.loading = true;
-    this.auth.login(this.form.username.value, this.form.password.value).pipe(first()).subscribe(data => {
-      this.error = false;
-      this.message = data;
+    // Attempt to login using values from form
+    this.auth.login(this.form.username.value, this.form.password.value).pipe(first()).subscribe(result => {
+      this.alerts.success(result['message']);
+      this.alerts.clear();
       this.router.navigate([this.returnUrl]);
     }, error => {
-      this.error = true;
-      this.message = error;
+      this.alerts.error(error);
       this.loading = false;
       this.submitted = false;
     });

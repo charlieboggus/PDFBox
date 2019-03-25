@@ -8,7 +8,7 @@ export class AccountService {
 
   constructor(private http: HttpClient) { }
 
-  updateAccountDetails(id: number, username: string, email: string, password: string) {
+  changeAccountDetails(id: number, username: string, email: string, password: string) {
     return this.http.put< any >(`http://localhost:5000/api/users/${ id }`, { username, email, password });
   }
 

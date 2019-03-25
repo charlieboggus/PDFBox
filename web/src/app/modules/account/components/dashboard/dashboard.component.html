@@ -3,23 +3,6 @@
     <!-- Dashboard Header -->
     <h2 class="text-left mb-4">{{ currentUser.username }}'s Dashboard:</h2>
 
-    <!-- Alert section -->
-    <!-- Success alert -->
-    <div *ngIf="!error && message && submitted" class="alert alert-success alert-dismissable fade show mb-3 text-center" role="alert">
-      {{ message }}
-      <button type="button" class="close" data-dismiss="alert" aria-label="close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-
-    <!-- Error Alert -->
-    <div *ngIf="error && message" class="alert alert-danger alert-dismissable fade show mb-3 text-center" role="alert">
-      Error: {{ message }}
-      <button type="button" class="close" data-dismiss="alert" aria-label="close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-
     <!-- Account Management Section -->
     <div class="card border border-light rounded shadow mb-4">
       <div class="card-header"><h4 class="text-left">Account Management</h4></div>

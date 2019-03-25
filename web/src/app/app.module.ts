@@ -14,12 +14,14 @@ import { AppComponent } from './app.component';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { NotfoundComponent } from './shared/components/notfound/notfound.component';
+import { AlertsComponent } from './shared/components/alerts/alerts.component';
 
 // Services
 import { AuthenticationGuard } from './shared/guards/auth.guard';
 import { AuthenticationService } from './shared/services/authentication.service';
 import { ErrorInterceptor } from './shared/services/error.interceptor';
 import { JwtInterceptor } from './shared/services/jwt.interceptor';
+import { AlertService } from './shared/services/alert.service';
 
 
 @NgModule({
@@ -28,6 +30,7 @@ import { JwtInterceptor } from './shared/services/jwt.interceptor';
     NavbarComponent,
     FooterComponent,
     NotfoundComponent,
+    AlertsComponent,
   ],
   imports: [
     BrowserModule,
@@ -37,6 +40,7 @@ import { JwtInterceptor } from './shared/services/jwt.interceptor';
     AppRoutingModule
   ],
   providers: [
+    AlertService,
     AuthenticationService,
     AuthenticationGuard,
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },

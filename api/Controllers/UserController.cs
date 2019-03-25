@@ -235,7 +235,7 @@ namespace PDFBox.Api.Controllers
             db.Users.Remove(user);
             await db.SaveChangesAsync();
 
-            return Ok(new { message = "User successfully deleted" });
+            return Ok(new { message = "User account successfully deleted" });
         }
 
         // Helper method to generate Hash and Salt for a password (so we don't store plaintext passwords in database)

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthenticationService } from 'src/app/shared/services/authentication.service';
+import { AlertService } from 'src/app/shared/services/alert.service';
 
 @Component({
   selector: 'app-register',
@@ -13,10 +14,8 @@ export class RegisterComponent implements OnInit {
   registerForm: FormGroup;
   loading = false;
   submitted = false;
-  message: string;
-  error: boolean;
 
-  constructor(private builder: FormBuilder, private route: ActivatedRoute, private router: Router, private auth: AuthenticationService) { }
+  constructor(private builder: FormBuilder, private route: ActivatedRoute, private router: Router, private auth: AuthenticationService, private alerts: AlertService) { }
 
   ngOnInit() {
     this.registerForm = this.builder.group({
@@ -30,19 +29,17 @@ export class RegisterComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
-
+    this.loading = true;
     if(this.registerForm.invalid) {
+      this.loading = false;
       return;
     }
 
-    this.loading = true;
     this.auth.register(this.form.username.value, this.form.email.value, this.form.password.value).subscribe(result => {
-      this.error = false;
-      this.message = result;
+      this.alerts.success(result['message'], true);
       this.router.navigate(['/login']);
     }, error => {
-      this.error = true;
-      this.message = error;
+      this.alerts.error(error);
       this.submitted = false;
       this.loading = false;
     });
