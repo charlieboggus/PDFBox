@@ -1,21 +1,14 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Net.Http.Headers;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using PDFBox.Api.Data;
-using PDFBox.Api.Helpers;
 using PDFBox.Api.Models;
-using PDFBox.Api.Models.Dtos;
 
 namespace PDFBox.Api.Controllers
 {
