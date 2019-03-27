@@ -7,12 +7,12 @@ import { AuthenticationService } from '../services/authentication.service';
   providedIn: 'root'
 })
 export class AuthenticationGuard implements CanActivate {
-  
-  constructor(private router: Router, private auth: AuthenticationService) {  }
+
+  constructor(private router: Router, private auth: AuthenticationService) { }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const currentUser = this.auth.currentUserValue;
-    if(currentUser) {
+    if (currentUser) {
       return true;
     }
 

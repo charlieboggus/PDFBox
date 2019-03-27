@@ -8,14 +8,13 @@ import { Alert, AlertType } from '../models/alert.model';
   providedIn: 'root'
 })
 export class AlertService {
-
-  private subject: Subject< Alert > = new Subject< Alert >();
+  private subject: Subject<Alert> = new Subject<Alert>();
   private keepAfterRouteChange: boolean = false;
 
   constructor(private router: Router) {
     router.events.subscribe(event => {
-      if(event instanceof NavigationStart) {
-        if(this.keepAfterRouteChange) {
+      if (event instanceof NavigationStart) {
+        if (this.keepAfterRouteChange) {
           this.keepAfterRouteChange = false;
         } else {
           this.clear();
@@ -24,7 +23,7 @@ export class AlertService {
     });
   }
 
-  getAlert(): Observable< any > {
+  getAlert(): Observable<any> {
     return this.subject.asObservable();
   }
 
@@ -43,13 +42,13 @@ export class AlertService {
   info(message: string, keepAfterRouteChange = false) {
     this.alert(AlertType.Info, message, keepAfterRouteChange);
   }
-  
+
   warning(message: string, keepAfterRouteChange = false) {
     this.alert(AlertType.Warning, message, keepAfterRouteChange);
   }
 
   alert(type: AlertType, message: string, keepAfterRouteChange = false) {
     this.keepAfterRouteChange = keepAfterRouteChange;
-    this.subject.next(< Alert > { type: type, message: message });
+    this.subject.next(<Alert>{ type: type, message: message });
   }
 }

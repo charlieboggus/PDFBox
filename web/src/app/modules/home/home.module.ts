@@ -2,24 +2,24 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-// Routing Module
+// Routing
 import { HomeRoutingModule } from './home-routing.module';
 
 // Components
-import { HomeComponent } from './components/home/home.component';
+import { IndexComponent } from './components/index/index.component';
+import { ContactComponent } from './components/contact/contact.component';
 import { PrivacyComponent } from './components/privacy/privacy.component';
 import { FaqComponent } from './components/faq/faq.component';
-import { ContactComponent } from './components/contact/contact.component';
 
 // Services
 import { ContactService } from './services/contact.service';
 
 @NgModule({
   declarations: [
-    HomeComponent, 
+    IndexComponent, 
+    ContactComponent, 
     PrivacyComponent, 
-    FaqComponent, 
-    ContactComponent
+    FaqComponent
   ],
   imports: [
     CommonModule,

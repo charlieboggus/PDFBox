@@ -4,7 +4,7 @@ using System.Net.Mail;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using PDFBox.Api.Helpers;
-using PDFBox.Api.Models;
+using PDFBox.Api.Models.Dtos;
 
 namespace PDFBox.Api.Controllers
 {
@@ -19,45 +19,46 @@ namespace PDFBox.Api.Controllers
             this.appSettings = appSettings.Value;
         }
 
-        [HttpPost]
-        public IActionResult SubmitForm([FromBody] ContactFormDto data)
+        // HTTP POST: /api/contact/submit
+        // <summary>
+        //  API method that is called when a user submits a contact form message
+        // </summary>
+        [HttpPost("submit")]
+        public IActionResult SubmitContactForm([FromBody] ContactDto form)
         {
-            // Validate the Model State
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return BadRequest(new { message = "Incomplete contact form." });
+            
+            using (var msg = new MailMessage("contact@pdfbox.com", "webmaster@pdfbox.com"))
             {
-                return BadRequest(new { success = false, message = "Invalid Model State" });
-            }
-
-            using(var message = new MailMessage("contact@pdfbox.com", "webmaster@pdfbox.com"))
-            {
-                // Configure the message to send
-                message.To.Add(new MailAddress("webmaster@pdfbox.com"));
-                message.From = new MailAddress("contact@pdfbox.com");
-                message.Subject = "PDFBox: New Contact Form Submission from " + data.Name;
-                string mailBody = 
-                    "Submission Details:\n" + 
+                // Configure the email message to send
+                msg.To.Add(new MailAddress("webmaster@pdfbox.com"));
+                msg.From = new MailAddress("contact@pdfbox.com");
+                msg.Subject = "PDFBox: New Contact Form Submission from " + form.Name;
+                msg.Body = 
+                    "Submission Details:\n" +
                     "-----------------------------------------------------------\n" +
-                    "Name: " + data.Name + "\n" +
-                    "Email: " + data.Email + "\n" +
+                    "Name: " + form.Name + "\n" +
+                    "Email: " + form.Email + "\n" +
                     "Message: \n" +
-                    "\t" + data.Message + "\n";
-                message.Body = mailBody;
-
+                    form.Message + "\n";
+                
                 // Configure SMTP client
-                // TODO: get a real smtp client maybe? We'd need to own pdfbox.com though
                 var client = new SmtpClient("smtp.mailtrap.io", 2525)
                 {
                     Credentials = new NetworkCredential(appSettings.SMTPUser, appSettings.SMTPPass),
                     EnableSsl = true
                 };
 
-                // Try and send the email
-                try {
-                    client.Send(message);
-                    return Ok(new { success = true, message = "Message successfully sent" });
-                }
-                catch (Exception e) {
-                    return Ok(new { success = false, message = e.Message });
+                // Send the configured email using SMTP client
+                try 
+                {
+                    client.Send(msg);
+                    return Ok(new { message = "Message successfully sent!" });
+                } 
+                catch (Exception e) 
+                {
+                    return BadRequest(new { message = "Failed to send message: " + e.Message });
                 }
             }
         }

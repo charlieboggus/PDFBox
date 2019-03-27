@@ -1,18 +1,19 @@
 using System;
-using System.Linq;
-using System.Text;
 using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using PDFBox.Api.Data;
-using PDFBox.Api.Models;
 using PDFBox.Api.Helpers;
+using PDFBox.Api.Models;
+using PDFBox.Api.Models.Dtos;
 
 namespace PDFBox.Api.Controllers
 {
@@ -31,244 +32,254 @@ namespace PDFBox.Api.Controllers
             this.appSettings = appSettings.Value;
         }
 
-        // Authentication method to authenticate user login credentials
-        // HTTP POST: /api/users/auth
-        [AllowAnonymous]
-        [HttpPost("auth")]
-        public async Task< IActionResult > Authenticate([FromBody] UserDto userData)
-        {
-            // Verify user login credentials
-            if(string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password))
-                return BadRequest(new { message = "Username or password is incorrect" });
-            
-            var user = await db.Users.SingleOrDefaultAsync(x => x.Username == userData.Username);
-            if(user == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
-            
-            if(!VerifyPasswordHash(userData.Password, user.PasswordHash, user.PasswordSalt))
-                return BadRequest(new { message = "Username or password is incorrect" });
-
-            // If user was successfully verified create a new JWT authentication token
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(appSettings.JwtSecret);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, user.Id.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
-
-            // Return basic user info (w/o password) and authentication token to store client-side
-            return Ok(new 
-            { 
-                id = user.Id, 
-                username = user.Username,
-                email = user.Email,
-                Token = tokenString
-            });
-        }
-
-        // Registration method to register a new user
         // HTTP POST: /api/users/register
+        // <summary>
+        //  API method to register a new user.
+        // </summary>
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task< IActionResult > Register([FromBody] UserDto userData)
+        public async Task< IActionResult > RegisterUser([FromBody] UserDto userData)
         {
-            // User data Validation
+            // Argument verification
             if (string.IsNullOrWhiteSpace(userData.Username))
-                return BadRequest(new { message = "Username is required" });
-
+                return BadRequest(new { message = "Username is required!" });
             if (string.IsNullOrWhiteSpace(userData.Email))
-                return BadRequest(new { message = "Email is required" });
-
+                return BadRequest(new { message = "Email is required!" });
             if (string.IsNullOrWhiteSpace(userData.Password))
-                return BadRequest(new { message = "Password is required" });
-
-            // Existing credentials validation
+                return BadRequest(new { message = "Password is required!" });
+            
+            // Check if provided username is already taken
             var usernameTaken = await db.Users.AnyAsync(x => x.Username == userData.Username);
             if (usernameTaken)
-                return BadRequest(new { message = "Username \"" + userData.Username + "\" is already taken" });
+                return BadRequest(new { message = "Username \"" + userData.Username + "\" is unavailable." });
 
+            // Check if provided email address is already in use
             var emailTaken = await db.Users.AnyAsync(x => x.Email == userData.Email);
             if (emailTaken)
-                return BadRequest(new { message = "Email \"" + userData.Email + "\" is already in use" });
+                return BadRequest(new { message = "Email \"" + userData.Email + "\" is already in use." });
 
-            // After validation we can create the new User
-            byte[] passwordHash;
-            byte[] passwordSalt;
-            CreatePasswordHash(userData.Password, out passwordHash, out passwordSalt);
+            // If username and email are available we can create a new user
+            CreatePasswordHash(userData.Password, out byte[] hash, out byte[] salt);
             var user = new User
             {
                 Username = userData.Username,
                 Email = userData.Email,
-                PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt,
+                PasswordHash = hash,
+                PasswordSalt = salt,
                 RegistrationDate = DateTime.Now
             };
 
-            // Add the newly created user to the database & save the database changes
+            // Add newly created user to the DB and save DB changes
             await db.Users.AddAsync(user);
             await db.SaveChangesAsync();
 
-            // Return HTTP Ok upon successful user registration
-            return Ok(new { message = "Registration successful" });
+            return Ok(new { message = "User registration successful!" });
         }
 
-        // Returns all users registered in system
-        // HTTP GET: /api/users
-        [HttpGet]
-        public IActionResult GetAll()
+        // HTTP POST: /api/users/authenticate
+        // <summary>
+        //  API method to authenticate a user. Used when a user logs in.
+        // </summary>
+        [AllowAnonymous]
+        [HttpPost("authenticate")]
+        public async Task< IActionResult > AuthenticateUser([FromBody] UserDto userData)
         {
-            // Get all the users in the database
-            IEnumerable< User > users = db.Users;
+            // Argument verification
+            if (string.IsNullOrWhiteSpace(userData.Username) || string.IsNullOrWhiteSpace(userData.Password))
+                return BadRequest(new { message = "Invalid username or password." });
+            
+            // Find the user with the provided username in the database
+            var user = await db.Users.SingleOrDefaultAsync(x => x.Username == userData.Username);
+            if (user == null)
+                return BadRequest(new { message = "Invalid username or password." });
+            
+            // Verify the hash of the provided password with the stored hash/salt of the user
+            if (!VerifyPasswordHash(userData.Password, user.PasswordHash, user.PasswordSalt))
+                return BadRequest(new { message = "Invalid username or password." });
+            
+            // If user was successfully verified we need to create a new JWT authentication token
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(appSettings.JwtSecret);
+            var tokenDesc = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, user.UserId.ToString())
+                }),
+                Expires = DateTime.UtcNow.AddDays(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDesc);
+            var tokenString = tokenHandler.WriteToken(token);
 
-            // Create a new list  of user data to return to the client
-            List< UserDto > userData = new List< UserDto >();
+            // Return authentication details back to client
+            return Ok(new { user.UserId, user.Username, Token = tokenString });
+        }
+
+        // HTTP GET: /api/users/all
+        // <summary>
+        //  API method to get information about every registered user
+        // </summary>
+        [AllowAnonymous]
+        [HttpGet("all")]
+        public async Task< IActionResult > GetAllUsers()
+        {
+            // TODO: might delete this method as it may be a security risk...
+
+            var users = await db.Users.ToListAsync();
+            var returnList = new List< Object >();
             foreach (User u in users)
             {
-                // Create a UserDto object for each user and add it to the return list
-                UserDto data = new UserDto
-                {
-                    Id = u.Id,
-                    Username = u.Username,
-                    Email = u.Email
-                };
-
-                userData.Add(data);
+                returnList.Add(new { u.UserId, u.Username, u.Email, u.RegistrationDate });
             }
 
-            // Return the UserDto list of all the registered users
-            return Ok(userData);
+            return Ok(returnList);
         }
 
-        // Returns user with given ID
         // HTTP GET: /api/users/{ id }
+        // <summary>
+        //  API method to get information about an existing user
+        // </summary>
         [HttpGet("{id}")]
         public async Task< IActionResult > GetUser([FromRoute] int id)
         {
-            // Try to find a user with given Id in database
-            var user = await db.Users.FindAsync(id);
-            if(user == null)
-                return BadRequest(new { message = "User not found" });
-            
-            // If a user was found create a new UserDto object to return to client
-            var userData = new UserDto
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email
-            };
-
-            // Return the user data to client with HTTP Ok
-            return Ok(userData);
-        }
-
-        // Method to update a user's data
-        // HTTP PUT: /api/users/{ id }
-        [HttpPut("{id}")]
-        public async Task< IActionResult > UpdateUser([FromRoute] int id, [FromBody] UserDto newData)
-        {
+            // Find user with the provided Id in the database
             var user = await db.Users.FindAsync(id);
             if (user == null)
-                return BadRequest(new { message = "User not found" });
+                return BadRequest(new { message = "User not found." });
+            
+            // Verify that the currently authenticated user is the same as the user whose details we're fetching
+            var authUser = Int32.Parse(HttpContext.User.Identity.Name);
+            if (user.UserId != authUser || id != authUser)
+                return Unauthorized(new { message = "You are not authorized to view the details of that user. "});
+            
+            // Return user details back to client (purposefully excluding any password details)
+            return Ok(new { user.UserId, user.Username, user.Email, user.RegistrationDate });
+        }
 
-            if (string.IsNullOrEmpty(newData.Username) && string.IsNullOrEmpty(newData.Email) && string.IsNullOrEmpty(newData.Password))
-                return BadRequest(new { message = "No new account data entered" });
-
-            // Username update (if it was entered)
-            if (!string.IsNullOrEmpty(newData.Username) && (newData.Username != user.Username))
+        // HTTP PUT: /api/users/{ id }
+        // <summary>
+        //  API method to update an existing user
+        // </summary>
+        [HttpPut("{id}")]
+        public async Task< IActionResult > UpdateUser([FromRoute] int id, [FromBody] UserDto userData)
+        {
+            // Find the user we want to update in the database
+            var user = await db.Users.SingleOrDefaultAsync(x => x.UserId == id);
+            if (user == null)
+                return BadRequest(new { message = "User not found." });
+            
+            // Verify that the currently authenticated user is the same as the user we're updating
+            var authUser = Int32.Parse(HttpContext.User.Identity.Name);
+            if (user.UserId != authUser || id != authUser)
+                return Unauthorized(new { message = "You are not authorized to edit that user." });
+            
+            // Argument verification
+            if (string.IsNullOrWhiteSpace(userData.Username) && string.IsNullOrWhiteSpace(userData.Email) && string.IsNullOrWhiteSpace(userData.Password))
+                return BadRequest(new { message = "Nothing entered." });
+            
+            // Update username if a new username was provided
+            if (!string.IsNullOrWhiteSpace(userData.Username) && (userData.Username != user.Username))
             {
-                // Check if new username is taken
-                var usernameTaken = await db.Users.AnyAsync(x => x.Username == newData.Username);
+                // Verify that the new username is not already in use
+                var usernameTaken = await db.Users.AnyAsync(x => x.Username == userData.Username);
                 if (usernameTaken)
-                    return BadRequest(new { message = "Username \"" + newData.Username + "\" is already taken" });
+                    return BadRequest(new { message = "Username \"" + userData.Username + "\" is already in use." });
                 
-                // If it's not update it
-                user.Username = newData.Username;
+                // If the provided username is available update the user's stored username
+                user.Username = userData.Username;
             }
 
-            // Email update (if it was entered)
-            if (!string.IsNullOrEmpty(newData.Email) && (newData.Email != user.Email))
+            // Update email if a new email address was provided
+            if (!string.IsNullOrWhiteSpace(userData.Email) && (userData.Email != user.Email))
             {
-                // Check if new email is taken
-                var emailTaken = await db.Users.AnyAsync(x => x.Email == newData.Email);
+                // Verify that the new email address is not already in use
+                var emailTaken = await db.Users.AnyAsync(x => x.Email == userData.Email);
                 if (emailTaken)
-                    return BadRequest(new { message = "Email \"" + newData.Email + "\" is already in use" });
-
-                // If it's not update it
-                user.Email = newData.Email;
+                    return BadRequest(new { message = "Email \"" + userData.Email + "\" is already in use." });
+                
+                // If the provided email is available update the user's stored email address
+                user.Email = userData.Email;
             }
 
-            // Password Update (if it was entered)
-            if(!string.IsNullOrEmpty(newData.Password))
+            // Update password if a new one was provided
+            if (!string.IsNullOrWhiteSpace(userData.Password))
             {
-                // Create hash & salt for new password
-                byte[] passwordHash;
-                byte[] passwordSalt;
-                CreatePasswordHash(newData.Password, out passwordHash, out passwordSalt);
-
-                // Update the password hash & salt for user
-                user.PasswordHash = passwordHash;
-                user.PasswordSalt = passwordSalt;
+                // Create a new hash for the new password and update the user's stored hash/salt
+                CreatePasswordHash(userData.Password, out byte[] hash, out byte[] salt);
+                user.PasswordHash = hash;
+                user.PasswordSalt = salt;
             }
 
             db.Users.Update(user);
             await db.SaveChangesAsync();
 
-            return Ok(new { message = "Successfully updated user profile" });
+            return Ok(new { message = "User account successfully updated." });
         }
 
-        // Method to delete user from system
         // HTTP DELETE: /api/users/{ id }
+        // <summary>
+        //  API method to delete a user
+        // </summary>
         [HttpDelete("{id}")]
         public async Task< IActionResult > DeleteUser([FromRoute] int id)
         {
+            // Find the user to delete in the database
             var user = await db.Users.FindAsync(id);
             if (user == null)
-                return BadRequest(new { message = "User not found" });
+                return BadRequest(new { message = "User not found." });
             
-            db.Users.Remove(user);
+            // Verify that the currently authenticated user is the same as the user who we're deleting
+            var authUser = Int32.Parse(HttpContext.User.Identity.Name);
+            if (user.UserId != authUser || id != authUser)
+                return Unauthorized(new { message = "You are not authorized to delete that user account." });
+            
+            // Remove the user from the database & save the changes
+            db.Remove(user);
             await db.SaveChangesAsync();
-
-            return Ok(new { message = "User account successfully deleted" });
+            
+            return Ok(new { message = "User account successfully deleted." });
         }
 
-        // Helper method to generate Hash and Salt for a password (so we don't store plaintext passwords in database)
+        // <summary>
+        //  Method to create a new encryption hash from a given password.
+        //  Used when a new user is registered or an existing user changes their password.
+        // </summary>
         private void CreatePasswordHash(string password, out byte[] hash, out byte[] salt)
         {
-            if(password == null || string.IsNullOrWhiteSpace(password))
-                throw new ArgumentNullException("Password cannot be null or empty");
+            // Argument verification
+            if (password == null || string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Password cannot be null or empty!");
             
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
+            // Generate the new hash
+            using (var hmac = new HMACSHA512())
             {
                 salt = hmac.Key;
                 hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
             }
         }
 
-        // Helper method to verify a given password. Returns true if given password's hash & salt match the stored hash & salt
+        // <summary>
+        //  Method that compares the hash of a given password to that of a stored password hash.
+        //  Used for password verification and user authentication.
+        // </summary>
         private bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
         {
-            // Argument validation
-            if(password == null || string.IsNullOrWhiteSpace(password))
-                throw new ArgumentNullException("Password cannot be null or empty");
-            if(storedHash.Length != 64)
-                throw new ArgumentException("Invalid password hash length (64 bytes expected)");
-            if(storedSalt.Length != 128)
-                throw new ArgumentException("Invalid password salt length (128 bytes expected)");
+            // Argument verification
+            if (password == null || string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Password cannot be null or empty!");
+            if (storedHash.Length != 64)
+                throw new ArgumentException("Invalid password hash length!");
+            if (storedSalt.Length != 128)
+                throw new ArgumentException("Invalid password salt length!");
 
-            // Verify the password hash using the stored salt
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
+            // Verify the password hash
+            using (var hmac = new HMACSHA512(storedSalt))
             {
-                var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-                for (int i = 0; i < computedHash.Length; i++)
+                var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+                for (int i = 0; i < hash.Length; i++)
                 {
-                    if (computedHash[i] != storedHash[i])
+                    if (hash[i] != storedHash[i])
                         return false;
                 }
             }

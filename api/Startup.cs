@@ -62,7 +62,8 @@ namespace PDFBox.Api
         {
             if (env.IsDevelopment()) { app.UseDeveloperExceptionPage(); } else { app.UseHsts(); }
 
-            //app.UseHttpsRedirection();
+            //app.UseHttpsRedirection(); This is commented out because it causes problems when calling the API from angular
+            
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials());
             app.UseAuthentication();
             app.UseMvc();

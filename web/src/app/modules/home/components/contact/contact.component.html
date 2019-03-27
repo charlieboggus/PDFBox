@@ -1,22 +1,5 @@
 <div class="row align-items-center justify-content-center w-100">
   <div class="col-md-6 text-center my-auto">
-
-    <!-- Alert for when message was successfully sent -->
-    <div class="alert alert-success alert-dismissable fade show mb-3 text-center" role="alert" *ngIf="formSubmitted && success">
-      Your message has been sent!
-      <button type="button" class="close" data-dismiss="alert" aria-label="close">
-          <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-
-    <!-- Alert for when message send failure -->
-    <div class="alert alert-danger alert-dismissable fade show mb-3 text-center" role="alert" *ngIf="formSubmitted && !success">
-      There was an error sending your message.
-      <button type="button" class="close" data-dismiss="alert" aria-label="close">
-          <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-
     <!-- Contact Form -->
     <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="border border-light p-4 rounded shadow">
       <!-- Form Header -->

@@ -4,14 +4,12 @@ import { Alert, AlertType } from '../../models/alert.model';
 import { AlertService } from '../../services/alert.service';
 
 @Component({
-  selector: 'app-alerts',
-  templateUrl: './alerts.component.html',
-  styleUrls: ['./alerts.component.css']
+  selector: 'app-alert',
+  templateUrl: './alert.component.html',
+  styleUrls: ['./alert.component.css']
 })
-export class AlertsComponent implements OnInit {
-
+export class AlertComponent implements OnInit {
   alerts: Alert[] = [];
-
 
   constructor(private alertService: AlertService) { }
 
