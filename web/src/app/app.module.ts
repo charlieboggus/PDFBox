@@ -8,6 +8,7 @@ import { AppRoutingModule } from './app-routing.module';
 
 // Modules
 import { HomeModule } from './modules/home/home.module';
+import { AccountModule } from './modules/account/account.module';
 
 // Components
 import { AppComponent } from './app.component';
@@ -42,6 +43,7 @@ import { JwtInterceptor } from './shared/interceptors/jwt.interceptor';
     FormsModule,
     ReactiveFormsModule,
     HomeModule,
+    AccountModule,
     AppRoutingModule
   ],
   providers: [
