@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // Application Routing
 import { AppRoutingModule } from './app-routing.module';
@@ -10,10 +11,13 @@ import { HomeModule } from './modules/home/home.module';
 
 // Components
 import { AppComponent } from './app.component';
+
 import { AlertComponent } from './shared/components/alert/alert.component';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { NotfoundComponent } from './shared/components/notfound/notfound.component';
+import { LoginComponent } from './shared/components/login/login.component';
+import { RegisterComponent } from './shared/components/register/register.component';
 
 // Services, Guards, & Interceptors
 import { AlertService } from './shared/services/alert.service';
@@ -28,11 +32,15 @@ import { JwtInterceptor } from './shared/interceptors/jwt.interceptor';
     AlertComponent,
     NavbarComponent,
     FooterComponent,
-    NotfoundComponent
+    NotfoundComponent,
+    LoginComponent,
+    RegisterComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
+    FormsModule,
+    ReactiveFormsModule,
     HomeModule,
     AppRoutingModule
   ],
