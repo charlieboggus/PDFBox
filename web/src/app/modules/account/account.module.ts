@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 // Routing
 import { AccountRoutingModule } from './account-routing.module';
@@ -15,6 +17,9 @@ import { DocumentsComponent } from './components/documents/documents.component';
   ],
   imports: [
     CommonModule,
+    HttpClientModule,
+    FormsModule,
+    ReactiveFormsModule,
     AccountRoutingModule
   ]
 })

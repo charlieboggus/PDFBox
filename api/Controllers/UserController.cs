@@ -113,7 +113,7 @@ namespace PDFBox.Api.Controllers
             var tokenString = tokenHandler.WriteToken(token);
 
             // Return authentication details back to client
-            return Ok(new { user.UserId, user.Username, Token = tokenString });
+            return Ok(new { id = user.UserId, user.Username, Token = tokenString });
         }
 
         // HTTP GET: /api/users/all
@@ -214,7 +214,7 @@ namespace PDFBox.Api.Controllers
             db.Users.Update(user);
             await db.SaveChangesAsync();
 
-            return Ok(new { message = "User account successfully updated." });
+            return Ok(new { id = user.UserId, user.Username, message = "User account successfully updated." });
         }
 
         // HTTP DELETE: /api/users/{ id }

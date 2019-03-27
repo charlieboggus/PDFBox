@@ -1,3 +1,50 @@
-<p>
-  dashboard works!
-</p>
+<div class="row align-items-center justify-content-center w-100">
+  <div class="col-md-12 text-center my-auto">
+    <!-- Dashboard Header -->
+    <h2 class="text-left mb-4">{{ currentUser.username }}'s Dashboard:</h2>
+
+    <!-- Account details management form -->
+    <div class="card border border-light rounded shadow mb-4">
+      <div class="card-header">
+        <h4 class="text-left">Account Management</h4>
+      </div>
+      <div class="card-body">
+        <form class="p-2" [formGroup]="detailsForm" (ngSubmit)="onSubmit()">
+          <!-- Change username form group -->
+          <div class="form-group text-left">
+            <label>Change Username:</label>
+            <input type="text" class="form-control" placeholder="New Username" formControlName="newUsername" />
+          </div>
+
+          <!-- Change email form group -->
+          <div class="form-group text-left">
+            <label>Change Email:</label>
+            <input type="email" class="form-control" placeholder="New Email" formControlName="newEmail" [ngClass]="{ 'is-invalid': ((form.newEmail.dirty || form.newEmail.touched) && form.newEmail.errors) }" />
+            <div *ngIf="((form.newEmail.dirty || form.newEmail.touched) && form.newEmail.errors)" class="invalid-feedback text-left">
+              <div *ngIf="form.newEmail.errors.email">Email must be a valid email address</div>
+            </div>
+          </div>
+
+          <!-- Change password form group -->
+          <div class="form-group text-left">
+            <label>Change Password:</label>
+            <input type="password" class="form-control" placeholder="New Password" formControlName="newPassword" />
+          </div>
+
+          <!-- Apply changes button -->
+          <button type="submit" class="btn btn-primary btn-block text-light" [disabled]="form.newEmail.errors">Apply Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Account button & confirmation -->
+    <button type="submit" class="btn btn-danger btn-block text-light mt-4" (click)="onDeletePress()">Delete Account</button>
+    <div *ngIf="delete" class="card border border-light rounded shadow mt-2 mb-2">
+      <div class="card-body">
+        <h5 class="mb-4">Are you sure you want to delete your account?</h5>
+        <button type="submit" class="btn btn-success btn-block text-light" (click)="onDeleteConfirm()"><strong>Yes</strong></button>
+        <button type="submit" class="btn btn-danger btn-block text-light" (click)="onDeleteCancel()"><strong>No</strong></button>
+      </div>
+    </div>
+  </div>
+</div>
