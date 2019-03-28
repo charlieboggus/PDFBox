@@ -9,8 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PDFBox.Api.Data;
 using PDFBox.Api.Models;
-using System.Net.Http;
-using System.Net;
 
 namespace PDFBox.Api.Controllers
 {
@@ -84,22 +82,14 @@ namespace PDFBox.Api.Controllers
             var user = await db.Users.Include("Documents").Where(x => x.UserId == authId).SingleOrDefaultAsync();
             if (user == null)
                 return Unauthorized(new { message = "You are not authorized to perform that action." });
-            
-            // TODO: figure this out
 
-            return Ok();
-        }
+            // Find the document with the requested id
+            var doc = user.Documents.Where(x => x.DocumentId == id && x.OwnerId == authId).SingleOrDefault();
+            if (doc == null)
+                return NotFound(new { message = "The requested document could not be found." });
 
-        // HTTP POST: /api/documents/convert
-        // <summary>
-        //  API method for converting a document to PDF without uploading it to the database
-        // </summary>
-        [HttpPost("convert")]
-        public async Task< IActionResult > ConvertDocument()
-        {
-            // TODO: figure this out
-
-            return Ok();
+            // Return the file to client for download
+            return File(doc.Data, GetContentType(doc.Extension), doc.Name);
         }
 
         // HTTP POST: /api/documents/upload
@@ -109,7 +99,7 @@ namespace PDFBox.Api.Controllers
         [HttpPost("upload")]
         public async Task< IActionResult > UploadDocument()
         {
-            // Find currently authorized user in database
+            // Find currently authorized user in database since you need to be logged into an account to upload documents
             var authId = Int32.Parse(HttpContext.User.Identity.Name);
             var user = await db.Users.FindAsync(authId);
             if (user == null || user.UserId != authId)
@@ -117,47 +107,43 @@ namespace PDFBox.Api.Controllers
 
             try
             {
-                // Get the uploaded files from the request form (can be multiple)
-                var files = Request.Form.Files;
-
-                // Iterate over each uploaded file
-                for (int i = 0; i < files.Count; i++)
+                // Iterate over each of the uploaded files in the request form
+                foreach (var file in Request.Form.Files)
                 {
-                    var file = files[i];
-                    
-                    // Open a read stream for the current file
+                    // Open streams to read file
                     using (var fs = file.OpenReadStream())
                     {
-                        // Open a binary reader for the current file so we can read its raw bytes
                         using (var br = new BinaryReader(fs))
                         {
-                            // Read info & data from current file
-                            byte[] data = br.ReadBytes((Int32) fs.Length);
+                            // Read filename and extension from current file
                             var filename = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-                            var filesize = ContentDispositionHeaderValue.Parse(file.ContentDisposition).Size;
                             var extension = filename.Substring(filename.LastIndexOf('.')).ToLower();
-                            
-                            // TODO: convert the document to PDF before storing it in database -- that's our whole schtick...
+                            var filenameNoExt = filename.Substring(0, (filename.Length - extension.Length));
 
-                            // Create a new Document object from file data
-                            var doc = new Document
+                            // Read file data
+                            var filedata = br.ReadBytes((Int32) fs.Length);
+                            var filesize = filedata.Length;
+
+                            // TODO: figure out how to convert document
+
+                            // Create a new document object from the uploaded file to store in database
+                            var doc = new Document 
                             {
                                 Name = filename,
                                 Extension = extension,
-                                Size = (filesize != null && filesize.HasValue) ? filesize.Value : data.Length,
+                                Size = filesize,
                                 CreationDate = DateTime.Now,
-                                Data = data,
+                                Data = filedata,
                                 OwnerId = user.UserId,
                                 Owner = user
                             };
 
-                            // Add the newly created document to the database
                             await db.Documents.AddAsync(doc);
                         }
                     }
                 }
 
-                // Once we're done iterating over all the uploaded documents we can save the database changes & return HTTP Ok
+                // Once we're done iterating over all the uploaded documents we can save the database changes
                 await db.SaveChangesAsync();
 
                 return Ok(new { message = "Successfully uploaded files." });
@@ -166,6 +152,19 @@ namespace PDFBox.Api.Controllers
             {
                 return BadRequest(new { message = "Document upload failed: " + e.Message });
             }
+        }
+
+        // HTTP POST: /api/documents/convert
+        // <summary>
+        //  API method for converting a document to PDF without uploading it to the database
+        // </summary>
+        [AllowAnonymous]
+        [HttpPost("convert")]
+        public async Task< IActionResult > ConvertDocument()
+        {
+            // TODO: figure this out
+
+            return Ok();
         }
 
         // HTTP DELETE: /api/documents/all
@@ -214,6 +213,30 @@ namespace PDFBox.Api.Controllers
             await db.SaveChangesAsync();
 
             return Ok(new { message = "Document successfully deleted." });
+        }
+
+        // <summary>
+        //  Helper method for any method returning a download file to the client.
+        //  Given a file extension, this method returns the HTML content type back to calling function.
+        // </summary>
+        private string GetContentType(string ext)
+        {
+            switch (ext)
+            {
+                case ".txt":        return "text/plain";
+                case ".csv":        return "text/csv";
+                case ".pdf":        return "application/pdf";
+                case ".doc":        return "application/vnd.ms-word";
+                case ".docx":       return "application/vnd.ms-word";
+                case ".xls":        return "application/vnd.ms-excel";
+                case ".xlsx":       return "application/vnd.openxmlformats.officedocument.spreadsheetml.sheet";
+                case ".png":        return "image/png";
+                case ".jpg":        return "image/jpeg";
+                case ".jpeg":       return "image/jpeg";
+                case ".gif":        return "image/gif";
+
+                default:            return "text/plain";
+            }
         }
     }
 }
