@@ -31,7 +31,7 @@ namespace PDFBox.Api.Controllers
         //  API method for retrieving the details for all documents a user has stored
         // </summary>
         [HttpGet("details/all")]
-        public async Task< IActionResult > GetDocuments()
+        public async Task< IActionResult > GetAllDocumentDetails()
         {
             // Find the currently authorized user in the database. 
             // We're using eager loading to load all of the user's documents into the List< Document > attribute when we find the user
@@ -53,7 +53,7 @@ namespace PDFBox.Api.Controllers
         //  API method for retrieving the details for a single document a user has stored
         // </summary>
         [HttpGet("details/{id}")]
-        public async Task< IActionResult > GetDocument([FromRoute] int id)
+        public async Task< IActionResult > GetDocumentDetails([FromRoute] int id)
         {
             // Find the currently authorized user in the database. 
             // We're using eager loading to load all of the user's documents into the List< Document > attribute when we find the user.
