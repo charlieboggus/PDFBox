@@ -166,8 +166,6 @@ namespace PDFBox.Api.Controllers
                 }
 
                 // Delete the temporary directory since we don't need it anymore
-                dir.Refresh();
-                files = dir.GetFiles();
                 foreach (var file in files)
                 {
                     System.IO.File.Delete(file.FullName);
