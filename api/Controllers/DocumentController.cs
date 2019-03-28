@@ -94,7 +94,8 @@ namespace PDFBox.Api.Controllers
 
         // HTTP POST: /api/documents/upload
         // <summary>
-        //  API method for uploading and storing a new document in database
+        //  API method for uploading and storing a new document in database. Any documents that are able to be
+        //  converted to PDF will be converted before being stored.
         // </summary>
         [HttpPost("upload")]
         public async Task< IActionResult > UploadDocument()
@@ -107,43 +108,73 @@ namespace PDFBox.Api.Controllers
 
             try
             {
-                // Iterate over each of the uploaded files in the request form
+                // Create the temporary directory for creating files if it doesn't exist
+                if (!Directory.Exists("~temp"))
+                    Directory.CreateDirectory("~temp");
+                
+                // Save each file from the HTTP Request Form to the temporary directory
                 foreach (var file in Request.Form.Files)
                 {
-                    // Open streams to read file
-                    using (var fs = file.OpenReadStream())
+                    var filepath = Path.Combine("~temp", file.FileName);
+                    using (var stream = new FileStream(filepath, FileMode.Create))
                     {
-                        using (var br = new BinaryReader(fs))
+                        await file.CopyToAsync(stream);
+                    }
+                }
+
+                // Get all the files in the temporary directory & iterate over each of them to try and convert them to PDF
+                var dir = new DirectoryInfo("~temp");
+                var files = dir.GetFiles();
+                foreach (var file in files)
+                {
+                    // If the file extension is a Word extension use the convert word method
+                    if (file.Extension == ".doc" || file.Extension == ".docx")
+                        ConvertWordToPdf(file);
+                }
+
+                // Refresh the directory and get all the files in it again so we can store them in database
+                dir.Refresh();
+                files = dir.GetFiles();
+                foreach (var file in files)
+                {
+                    using (var stream = file.OpenRead())
+                    {
+                        using (var br = new BinaryReader(stream))
                         {
-                            // Read filename and extension from current file
-                            var filename = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-                            var extension = filename.Substring(filename.LastIndexOf('.')).ToLower();
-                            var filenameNoExt = filename.Substring(0, (filename.Length - extension.Length));
+                            // Get file info
+                            var filename = file.Name;
+                            var extension = file.Extension;
+                            var size = file.Length;
+                            var data = br.ReadBytes((Int32) stream.Length);
 
-                            // Read file data
-                            var filedata = br.ReadBytes((Int32) fs.Length);
-                            var filesize = filedata.Length;
-
-                            // TODO: figure out how to convert document
-
-                            // Create a new document object from the uploaded file to store in database
-                            var doc = new Document 
+                            // Create a new Document object from file info
+                            var doc = new Document
                             {
                                 Name = filename,
                                 Extension = extension,
-                                Size = filesize,
+                                Size = size,
                                 CreationDate = DateTime.Now,
-                                Data = filedata,
+                                Data = data,
                                 OwnerId = user.UserId,
                                 Owner = user
                             };
 
+                            // Store the new document object in database
                             await db.Documents.AddAsync(doc);
                         }
                     }
                 }
 
-                // Once we're done iterating over all the uploaded documents we can save the database changes
+                // Delete the temporary directory since we don't need it anymore
+                dir.Refresh();
+                files = dir.GetFiles();
+                foreach (var file in files)
+                {
+                    System.IO.File.Delete(file.FullName);
+                }
+                Directory.Delete(dir.FullName);
+
+                // Finally save database changes
                 await db.SaveChangesAsync();
 
                 return Ok(new { message = "Successfully uploaded files." });
@@ -237,6 +268,47 @@ namespace PDFBox.Api.Controllers
 
                 default:            return "text/plain";
             }
+        }
+
+        private void ConvertWordToPdf(FileInfo file)
+        {
+            object missing = System.Reflection.Missing.Value;
+
+            // Initialize the Interop Word Applicaiton for conversion
+            var word = new Microsoft.Office.Interop.Word.Application();
+            word.Visible = false;
+            word.ScreenUpdating = false;
+
+            // Open the word document file
+            Object filename = file.FullName;
+            var doc = word.Documents.Open(
+                ref filename, ref missing, ref missing, ref missing, 
+                ref missing, ref missing, ref missing, ref missing, 
+                ref missing, ref missing, ref missing, ref missing, 
+                ref missing, ref missing, ref missing, ref missing
+            );
+            doc.Activate();
+
+            // Save it as PDF
+            object outfile = file.FullName.Replace(file.Extension, ".pdf");
+            object format = Microsoft.Office.Interop.Word.WdSaveFormat.wdFormatPDF;
+            doc.SaveAs2(
+                ref outfile, ref format, ref missing, ref missing, 
+                ref missing, ref missing, ref missing, ref missing, 
+                ref missing, ref missing, ref missing, ref missing, 
+                ref missing, ref missing, ref missing, ref missing
+            );
+
+            // Close the document and word application
+            object saveChanges = Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges;
+            ((Microsoft.Office.Interop.Word._Document) doc).Close(ref saveChanges, ref missing, ref missing);
+            doc = null;
+
+            ((Microsoft.Office.Interop.Word._Application) word).Quit(ref missing, ref missing, ref missing);
+            word = null;
+
+            // Delete the original file since it's not needed anymore after conversion
+            System.IO.File.Delete(file.FullName);
         }
     }
 }
