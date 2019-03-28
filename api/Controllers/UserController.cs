@@ -129,9 +129,7 @@ namespace PDFBox.Api.Controllers
             var users = await db.Users.ToListAsync();
             var returnList = new List< Object >();
             foreach (User u in users)
-            {
                 returnList.Add(new { u.UserId, u.Username, u.Email, u.RegistrationDate });
-            }
 
             return Ok(returnList);
         }
@@ -146,7 +144,7 @@ namespace PDFBox.Api.Controllers
             // Find user with the provided Id in the database
             var user = await db.Users.FindAsync(id);
             if (user == null)
-                return BadRequest(new { message = "User not found." });
+                return NotFound(new { message = "User not found." });
             
             // Verify that the currently authenticated user is the same as the user whose details we're fetching
             var authUser = Int32.Parse(HttpContext.User.Identity.Name);
@@ -167,7 +165,7 @@ namespace PDFBox.Api.Controllers
             // Find the user we want to update in the database
             var user = await db.Users.SingleOrDefaultAsync(x => x.UserId == id);
             if (user == null)
-                return BadRequest(new { message = "User not found." });
+                return NotFound(new { message = "User not found." });
             
             // Verify that the currently authenticated user is the same as the user we're updating
             var authUser = Int32.Parse(HttpContext.User.Identity.Name);
@@ -227,7 +225,7 @@ namespace PDFBox.Api.Controllers
             // Find the user to delete in the database
             var user = await db.Users.FindAsync(id);
             if (user == null)
-                return BadRequest(new { message = "User not found." });
+                return NotFound(new { message = "User not found." });
             
             // Verify that the currently authenticated user is the same as the user who we're deleting
             var authUser = Int32.Parse(HttpContext.User.Identity.Name);
