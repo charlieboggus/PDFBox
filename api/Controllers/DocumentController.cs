@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PDFBox.Api.Data;
 using PDFBox.Api.Models;
+using System.Net.Http;
+using System.Net;
 
 namespace PDFBox.Api.Controllers
 {
@@ -63,7 +65,7 @@ namespace PDFBox.Api.Controllers
             // Find the document with the provided id
             var doc = user.Documents.Where(x => x.DocumentId == id).SingleOrDefault();
             if (doc == null)
-                return BadRequest(new { message = "Requested document not found." });
+                return NotFound(new { message = "The requested document could not be found." });
 
             // If the requested document was found we can return a new JSON object with the document details
             return Ok(new { doc.DocumentId, doc.Name, doc.Extension, doc.Size, doc.CreationDate });
@@ -82,15 +84,15 @@ namespace PDFBox.Api.Controllers
             var user = await db.Users.Include("Documents").Where(x => x.UserId == authId).SingleOrDefaultAsync();
             if (user == null)
                 return Unauthorized(new { message = "You are not authorized to perform that action." });
-
-            // TODO: figure this out
             
+            // TODO: figure this out
+
             return Ok();
         }
 
         // HTTP POST: /api/documents/convert
         // <summary>
-        //  API method for converting a document to PDF
+        //  API method for converting a document to PDF without uploading it to the database
         // </summary>
         [HttpPost("convert")]
         public async Task< IActionResult > ConvertDocument()
@@ -135,6 +137,8 @@ namespace PDFBox.Api.Controllers
                             var filesize = ContentDispositionHeaderValue.Parse(file.ContentDisposition).Size;
                             var extension = filename.Substring(filename.LastIndexOf('.')).ToLower();
                             
+                            // TODO: convert the document to PDF before storing it in database -- that's our whole schtick...
+
                             // Create a new Document object from file data
                             var doc = new Document
                             {
@@ -178,9 +182,14 @@ namespace PDFBox.Api.Controllers
             if (user == null)
                 return Unauthorized(new { message = "You are not authorized to perform that action." });
             
-            // TODO: figure out this
+            // Find all the documents owned by the currently authorized user & delete them from database
+            var docs = await db.Documents.Where(x => x.OwnerId == user.UserId).ToListAsync();
+            if (docs == null)
+                return NotFound(new { message = "Requested documents not found." });
+            db.Documents.RemoveRange(docs);
+            await db.SaveChangesAsync();
 
-            return Ok();
+            return Ok(new { message = "All documents successfully deleted." });
         }
 
         // HTTP DELETE: /api/documents/{ id }
@@ -197,9 +206,14 @@ namespace PDFBox.Api.Controllers
             if (user == null)
                 return Unauthorized(new { message = "You are not authorized to perform that action." });
 
-            // TODO: figure this out
+            // Find the document in the database with authenticated user OwnerId and given DocumentId & remove it from DB
+            var doc = await db.Documents.Where(x => x.OwnerId == user.UserId && x.DocumentId == id).SingleOrDefaultAsync();
+            if (doc == null)
+                return NotFound(new { message = "Requested document not found." });
+            db.Documents.Remove(doc);
+            await db.SaveChangesAsync();
 
-            return Ok();
+            return Ok(new { message = "Document successfully deleted." });
         }
     }
 }
