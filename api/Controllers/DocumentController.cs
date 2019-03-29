@@ -42,7 +42,7 @@ namespace PDFBox.Api.Controllers
             // Create a new list to store the details of each document
             var returnList = new List< Object >();
             foreach (Document doc in user.Documents)
-                returnList.Add(new { doc.DocumentId, doc.Name, doc.Extension, doc.Size, doc.CreationDate });
+                returnList.Add(new { doc.DocumentId, doc.Name, doc.Extension, doc.Size, creationDate = doc.CreationDate.ToShortDateString() });
 
             return Ok(returnList);
         }
@@ -67,7 +67,7 @@ namespace PDFBox.Api.Controllers
                 return NotFound(new { message = "The requested document could not be found." });
 
             // If the requested document was found we can return a new JSON object with the document details
-            return Ok(new { doc.DocumentId, doc.Name, doc.Extension, doc.Size, doc.CreationDate });
+            return Ok(new { doc.DocumentId, doc.Name, doc.Extension, doc.Size, creationDate = doc.CreationDate.ToShortDateString() });
         }
 
         // HTTP GET: /api/documents/{ id }
