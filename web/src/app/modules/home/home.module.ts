@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FileUploadModule } from 'ng2-file-upload';
 
 // Routing
 import { HomeRoutingModule } from './home-routing.module';
@@ -13,18 +14,21 @@ import { FaqComponent } from './components/faq/faq.component';
 
 // Services
 import { ContactService } from './services/contact.service';
+import { ConvertComponent } from './components/convert/convert.component';
 
 @NgModule({
   declarations: [
     IndexComponent, 
     ContactComponent, 
     PrivacyComponent, 
-    FaqComponent
+    FaqComponent,
+    ConvertComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    FileUploadModule,
     HomeRoutingModule
   ],
   providers: [

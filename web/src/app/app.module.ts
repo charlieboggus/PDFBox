@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FileUploadModule } from 'ng2-file-upload';
 
 // Application Routing
 import { AppRoutingModule } from './app-routing.module';
@@ -42,6 +43,7 @@ import { JwtInterceptor } from './shared/interceptors/jwt.interceptor';
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
+    FileUploadModule,
     HomeModule,
     AccountModule,
     AppRoutingModule

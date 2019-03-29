@@ -1,0 +1,56 @@
+<div class="row align-items-center justify-content-center w-100">
+  <div class="col-md-12 text-center my-auto">
+    <!-- Header -->
+    <h2 class="text-left mb-4">Upload Files:</h2>
+    
+    <!-- Upload form -->
+    <div class="card border border-light rounded shadow mb-4">
+      <div class="card-body">
+        <!-- File upload zone (drag/drop and button) -->
+        <div ng2FileDrop [ngClass]="{ 'drop-zone-hover': dropzoneHover }" (fileOver)="onDropzoneHover($event)" [uploader]="uploader" class="drop-zone">
+          Drag files here to upload
+          <br />
+          or
+          <br />
+          <button type="button" (click)="fileInput.click()" class="btn btn-secondary mt-1">Select Files</button>
+          <span style="visibility: hidden; position: absolute; overflow: hidden; width: 0px; height:0px;border:none;margin:0; padding:0">
+            <input #fileInput type="file" ng2FileSelect [uploader]="uploader" multiple />
+          </span>
+        </div>
+
+        <!-- Convert to PDF checkbox -->
+        <div class="form-check mt-3">
+          <label class="form-check-label mr-2" for="convertCheck">Convert to PDF?</label>
+          <input id="convertCheck" type="checkbox" [checked]="convertFiles" (change)="convertFiles = !convertFiles" />
+        </div>
+        
+        <!-- Submit button -->
+        <button type="submit" (click)="onUploadSubmit()" [disabled]="submitted || uploader.queue.length === 0" class="btn btn-success btn-block text-light mt-3">Begin Upload</button>
+      </div>
+
+      <!-- Card footer that displays a table of all the queued files -->
+      <div class="card-footer" *ngIf="uploader.queue.length > 0">
+        <table class="table table-striped table-hover table-sm">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">File</th>
+              <th scope="col">Size</th>
+              <th scope="col">Remove</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of uploader.queue; index as i">
+              <td scope="row">{{ i + 1 }}</td>
+              <td>{{ item?.file?.name }}</td>
+              <td nowrap>{{ item?.file?.size / 1024 / 1024 | number: '.2' }} MB</td>
+              <td nowrap>
+                <button type="button" class="btn btn-danger btn-sm" (click)="item.remove()">X</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
