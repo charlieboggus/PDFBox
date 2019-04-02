@@ -1,3 +1,23 @@
-<p>
-  index works!
-</p>
+<div class="row align-items-center justify-content-center w-100">
+  <div *ngIf="currentUser">
+    <div class="col-md-12 text-center">
+      <h2 class="mb-4">Hello {{ currentUser.username }}!</h2>
+      <button type="submit" class="btn-lg btn-primary text-light shadow mr-1" (click)="redirectUpload()">Upload Documents</button>
+      <button type="submit" class="btn-lg btn-success text-light shadow" (click)="redirectView()">View your Documents</button>
+    </div>
+    <div class="col-md-12 text-center mt-4">
+      <button type="submit" class="btn-lg btn-dark text-light shadow btn-block" (click)="redirectConvert()">Convert Documents</button>
+    </div>
+  </div>
+
+  <div *ngIf="!currentUser">
+    <div class="col-md-12 text-center">
+      <h2 class="mb-4">Welcome to PDFBox!</h2>
+      <button type="submit" class="btn-lg btn-success text-light shadow mr-1" (click)="redirectLogin()">Login</button>
+      <button type="submit" class="btn-lg btn-primary text-light shadow" (click)="redirectRegister()">Register</button>
+    </div>
+    <div class="col-md-12 text-center mt-4">
+      <button type="submit" class="btn-lg btn-dark text-light shadow btn-block" (click)="redirectConvert()">Convert Documents</button>
+    </div>
+  </div>
+</div>
