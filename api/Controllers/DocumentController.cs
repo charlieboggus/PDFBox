@@ -126,9 +126,70 @@ namespace PDFBox.Api.Controllers
         [HttpPost("convert")]
         public async Task< IActionResult > ConvertDocument()
         {
-            // TODO: figure this out
+            // Get the uploaded file from the request form
+            var file = Request.Form.Files[0];
 
-            return Ok();
+            // Create the temporary directory for creating files if it doesn't exist
+            if (!Directory.Exists("~temp"))
+                Directory.CreateDirectory("~temp");
+            
+            // Save the uploaded file to the temp directory
+            var filepath = Path.Combine("~temp", file.FileName);
+            using (var stream = new FileStream(filepath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // Convert the file
+            var dir = new DirectoryInfo("~temp");
+            var localFiles = dir.GetFiles();
+            foreach (var f in localFiles)
+            {
+                // If the file extension is a Word extension use the convert Word method
+                if (f.Extension == ".doc" || f.Extension == ".docx")
+                    ConvertWordToPdf(f);
+
+                // If the file extension is a PPT extension use the convert PPT method
+                if (f.Extension == ".ppt" || f.Extension == ".pptx")
+                    ConvertPowerPointToPdf(f);
+                    
+                // If the file extension is an Excel extension use the convert Excel method
+                if (f.Extension == ".xls" || f.Extension == ".xlsx")
+                    ConvertExcelToPdf(f);
+
+                // No other file types are supported for conversion to PDF at this time...
+            }
+
+            // Refresh the directory and get all the files in it again and create a new Document object
+            // from the uploaded file
+            dir.Refresh();
+            localFiles = dir.GetFiles();
+            var docs = new List< Document >();
+            using (var stream = localFiles[0].OpenRead())
+            {
+                using (var br = new BinaryReader(stream))
+                {
+                    var doc = new Document
+                    {
+                        Name = localFiles[0].Name,
+                        Extension = localFiles[0].Extension,
+                        Size = localFiles[0].Length,
+                        Data = br.ReadBytes((Int32) stream.Length)
+                    };
+
+                    docs.Add(doc);
+                }
+            }
+
+            // Delete the temporary directory since we don't need it anymore
+            foreach (var f in localFiles)
+            {
+                System.IO.File.Delete(f.FullName);
+            }
+            Directory.Delete(dir.FullName);
+
+            // Return the file to client for download
+            return File(docs[0].Data, GetContentType(docs[0].Extension), docs[0].Name);
         }
 
         // HTTP DELETE: /api/documents/all
