@@ -28,8 +28,8 @@ namespace PDFBox.Api
             services.Configure< AppSettings >(Configuration.GetSection("AppSettings"));
 
             // Create the Database Contexts
-            //services.AddDbContext< PDFBoxContext >(options => options.UseInMemoryDatabase("pdfbox"));   // In memory database for debugging
-            services.AddDbContext< PDFBoxContext >(options => options.UseNpgsql(Configuration.GetConnectionString("PDFBoxConnection")));    // PostgreSQL DB for prod
+            services.AddDbContext< PDFBoxContext >(options => options.UseInMemoryDatabase("pdfbox"));                                       // In memory database for debugging
+            //services.AddDbContext< PDFBoxContext >(options => options.UseNpgsql(Configuration.GetConnectionString("PDFBoxConnection")));    // PostgreSQL DB for prod
 
             // Configure JWT authentication for user accounts
             services.AddAuthentication(options => 

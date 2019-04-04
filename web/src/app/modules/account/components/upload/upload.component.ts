@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from "@angular/forms";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
 import { FileUploader } from "ng2-file-upload";
 
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -17,6 +15,7 @@ export class UploadComponent implements OnInit {
   dropzoneHover: boolean = false;
   convertFiles: boolean = false;
   submitted: boolean = false;
+  loading: boolean = false;
 
   constructor(private http: HttpClient, private alerts: AlertService) { }
 
@@ -25,28 +24,31 @@ export class UploadComponent implements OnInit {
   }
 
   onDropzoneHover(e: any): void {
-    console.log(this.convertFiles);
     this.dropzoneHover = e;
   }
 
   onUploadSubmit() {
     this.submitted = true;
-    let formData = new FormData();
+    this.loading = true;
 
-    // Populate form data
+    // Create form data for HTTP request
+    let formData = new FormData();
     for (let i = 0; i < this.uploader.queue.length; i++) {
       let file = this.uploader.queue[i]._file;
       formData.append('file', file);
     }
     formData.append('convert', this.convertFiles.toString());
 
+    // Post the form data to API
     this.http.post< any >('http://localhost:5000/api/documents/upload', formData).subscribe(result => {
       this.alerts.success(result.message);
       this.uploader.clearQueue();
       this.submitted = false;
+      this.loading = false;
     }, error => {
       this.alerts.error(error);
       this.submitted = false;
+      this.loading = false;
     });
   }
 }

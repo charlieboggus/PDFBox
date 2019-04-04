@@ -25,7 +25,10 @@
         </div>
         
         <!-- Submit button -->
-        <button type="submit" (click)="onUploadSubmit()" [disabled]="submitted || uploader.queue.length === 0" class="btn btn-success btn-block text-light mt-3">Begin Upload</button>
+        <button type="submit" (click)="onUploadSubmit()" [disabled]="(submitted && loading) || uploader.queue.length === 0" class="btn btn-success btn-block text-light mt-3">
+          <span *ngIf="submitted && loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Begin Upload
+        </button>
       </div>
 
       <!-- Card footer that displays a table of all the queued files -->

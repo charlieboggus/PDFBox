@@ -3,6 +3,32 @@
     <!-- Header -->
     <h2 class="mb-4">Convert a document to PDF</h2>
 
-    
+    <!-- Convert form -->
+    <div class="card border border-light rounded shadow mb-4">
+      <div class="card-body">
+        <!-- File drop zone -->
+        <div ng2FileDrop [ngClass]="{ 'drop-zone-hover': dropzoneHover }" (fileOver)="onDropzoneHover($event)" [uploader]="uploader" class="drop-zone">
+          Drag file here to upload
+          <br />
+          or
+          <br />
+          <button type="button" (click)="fileInput.click()" class="btn btn-secondary mt-1">Select File</button>
+          <span style="visibility: hidden; position: absolute; overflow: hidden; width: 0px; height:0px;border:none;margin:0; padding:0">
+            <input #fileInput type="file" ng2FileSelect [uploader]="uploader" />
+          </span>
+        </div>
+
+        <!-- Filename display -->
+        <div *ngIf="uploader.queue.length > 0" class="mt-2">
+          <strong>Selected File: </strong>{{ uploader.queue[0]._file.name }}
+        </div>
+
+        <!-- Submit button -->
+        <button type="submit" (click)="onConvertSubmit()" [disabled]="(submitted && loading) || uploader.queue.length === 0" class="btn btn-success btn-block text-light mt-3">
+          <span *ngIf="submitted && loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Convert to PDF
+        </button>
+      </div>
+    </div>
   </div>
 </div>
