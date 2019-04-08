@@ -28,6 +28,7 @@ import { AuthenticationGuard } from './shared/guards/auth.guard';
 import { ErrorInterceptor } from './shared/interceptors/error.interceptor';
 import { JwtInterceptor } from './shared/interceptors/jwt.interceptor';
 
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -36,7 +37,7 @@ import { JwtInterceptor } from './shared/interceptors/jwt.interceptor';
     FooterComponent,
     NotfoundComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
   ],
   imports: [
     BrowserModule,
