@@ -5,7 +5,7 @@
 
 - **Project Demo:** [TBA](#)
 # Project Description:
-TBA
+This project was launched in order to convert Microsoft Office files to PDF format.  The launch was inspired by the frustration of losing formatting when Microsoft Office documents are opened on a different computer. Our design is built around efficiency and simplicity.
 
 # Misc:
 This project's backend was developed using [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet) version 2.2
