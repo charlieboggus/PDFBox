@@ -27,6 +27,8 @@ import { AuthenticationService } from './shared/services/authentication.service'
 import { AuthenticationGuard } from './shared/guards/auth.guard';
 import { ErrorInterceptor } from './shared/interceptors/error.interceptor';
 import { JwtInterceptor } from './shared/interceptors/jwt.interceptor';
+import { TopbanneradComponent } from './shared/components/topbannerad/topbannerad.component';
+
 
 @NgModule({
   declarations: [
@@ -36,7 +38,8 @@ import { JwtInterceptor } from './shared/interceptors/jwt.interceptor';
     FooterComponent,
     NotfoundComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    TopbanneradComponent,
   ],
   imports: [
     BrowserModule,
