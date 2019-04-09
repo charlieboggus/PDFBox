@@ -118,7 +118,6 @@ namespace PDFBox.Api.Controllers
         // <summary>
         //  API method to get information about every registered user
         // </summary>
-        [AllowAnonymous]
         [HttpGet("all")]
         public async Task< IActionResult > GetAllUsers()
         {
