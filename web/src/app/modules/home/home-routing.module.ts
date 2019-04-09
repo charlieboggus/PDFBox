@@ -5,6 +5,7 @@ import { PrivacyComponent } from './components/privacy/privacy.component';
 import { FaqComponent } from './components/faq/faq.component';
 import { ContactComponent } from './components/contact/contact.component';
 import { ConvertComponent } from './components/convert/convert.component';
+import { AboutusComponent } from './components/aboutus/aboutus.component';
 
 const routes: Routes = [
   { path: '',  component: IndexComponent },             // Home page routing
@@ -13,7 +14,8 @@ const routes: Routes = [
   { path: 'privacy', component: PrivacyComponent },     // Privacy page routing
   { path: 'faq', component: FaqComponent },             // FAQ page routing
   { path: 'contact', component: ContactComponent },     // Contact page routing
-  { path: 'convert', component: ConvertComponent }      // Convert page routing
+  { path: 'convert', component: ConvertComponent },      // Convert page routing
+  { path: 'aboutus', component: AboutusComponent },      // Convert page routing
 ];
 
 @NgModule({

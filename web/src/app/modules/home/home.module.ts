@@ -11,6 +11,7 @@ import { IndexComponent } from './components/index/index.component';
 import { ContactComponent } from './components/contact/contact.component';
 import { PrivacyComponent } from './components/privacy/privacy.component';
 import { FaqComponent } from './components/faq/faq.component';
+import { AboutusComponent} from './components/aboutus/aboutus.component';
 
 // Services
 import { ContactService } from './services/contact.service';
@@ -22,7 +23,8 @@ import { ConvertComponent } from './components/convert/convert.component';
     ContactComponent, 
     PrivacyComponent, 
     FaqComponent,
-    ConvertComponent
+    ConvertComponent,
+    AboutusComponent
   ],
   imports: [
     CommonModule,
