@@ -59,15 +59,13 @@ namespace PDFBox.Api.Controllers
                 return BadRequest(new { message = "Email \"" + userData.Email + "\" is already in use." });
 
             // If username and email are available we can create a new user
-            CreatePasswordHash(userData.Password, out byte[] hash, out byte[] salt);
             var user = new User
             {
                 Username = userData.Username,
                 Email = userData.Email,
-                PasswordHash = hash,
-                PasswordSalt = salt,
                 RegistrationDate = DateTime.Now
             };
+            user.CreatePasswordHash(userData.Password);
 
             // Add newly created user to the DB and save DB changes
             await db.Users.AddAsync(user);
@@ -94,7 +92,7 @@ namespace PDFBox.Api.Controllers
                 return BadRequest(new { message = "Invalid username or password." });
             
             // Verify the hash of the provided password with the stored hash/salt of the user
-            if (!VerifyPasswordHash(userData.Password, user.PasswordHash, user.PasswordSalt))
+            if (!user.VerifyPasswordHash(userData.Password))
                 return BadRequest(new { message = "Invalid username or password." });
             
             // If user was successfully verified we need to create a new JWT authentication token
@@ -202,12 +200,7 @@ namespace PDFBox.Api.Controllers
 
             // Update password if a new one was provided
             if (!string.IsNullOrWhiteSpace(userData.Password))
-            {
-                // Create a new hash for the new password and update the user's stored hash/salt
-                CreatePasswordHash(userData.Password, out byte[] hash, out byte[] salt);
-                user.PasswordHash = hash;
-                user.PasswordSalt = salt;
-            }
+                user.CreatePasswordHash(userData.Password);
 
             db.Users.Update(user);
             await db.SaveChangesAsync();
@@ -237,52 +230,6 @@ namespace PDFBox.Api.Controllers
             await db.SaveChangesAsync();
             
             return Ok(new { message = "User account successfully deleted." });
-        }
-
-        // <summary>
-        //  Method to create a new encryption hash from a given password.
-        //  Used when a new user is registered or an existing user changes their password.
-        // </summary>
-        private void CreatePasswordHash(string password, out byte[] hash, out byte[] salt)
-        {
-            // Argument verification
-            if (password == null || string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Password cannot be null or empty!");
-            
-            // Generate the new hash
-            using (var hmac = new HMACSHA512())
-            {
-                salt = hmac.Key;
-                hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            }
-        }
-
-        // <summary>
-        //  Method that compares the hash of a given password to that of a stored password hash.
-        //  Used for password verification and user authentication.
-        // </summary>
-        private bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
-        {
-            // Argument verification
-            if (password == null || string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Password cannot be null or empty!");
-            if (storedHash.Length != 64)
-                throw new ArgumentException("Invalid password hash length!");
-            if (storedSalt.Length != 128)
-                throw new ArgumentException("Invalid password salt length!");
-
-            // Verify the password hash
-            using (var hmac = new HMACSHA512(storedSalt))
-            {
-                var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-                for (int i = 0; i < hash.Length; i++)
-                {
-                    if (hash[i] != storedHash[i])
-                        return false;
-                }
-            }
-
-            return true;
         }
     }
 }
