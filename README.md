@@ -3,7 +3,6 @@
 
 - **Project Name:** PDFBox
 
-- **Project Demo:** [TBA](#)
 # Project Description:
 This project was launched in order to convert Microsoft Office files to PDF format.  The launch was inspired by the frustration of losing formatting when Microsoft Office documents are opened on a different computer. Our design is built around efficiency and simplicity.
 
