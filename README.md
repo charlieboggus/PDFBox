@@ -3,6 +3,10 @@
 
 - **Project Name:** PDFBox
 
+- **Project Presentation:** [view](https://docs.google.com/presentation/d/1nXvlwAUlC4b8naXIDQge1ErG8gWHoYxhnVSQ5wy7md0/edit?usp=sharing) or [download](#)
+
+- **Project Write-Up:** [click me](https://github.com/charlieboggus/SP19-AMIS-3610-Group-Project/blob/master/Write%20up.docx)
+
 # Project Description:
 This project was launched in order to convert Microsoft Office files to PDF format.  The launch was inspired by the frustration of losing formatting when Microsoft Office documents are opened on a different computer. Our design is built around efficiency and simplicity.
 
