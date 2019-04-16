@@ -30,15 +30,8 @@ namespace PDFBox.Api.Models
         // <summary>
         //  Method for converting a document to PDF given a user and IFormFile
         // </summary>
-        public static async Task< Document > Convert(User owner, IFormFile file)
+        public static Document Convert(User owner, FileInfo localFile)
         {
-            var filePath = Path.Combine("~temp", file.FileName);
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            var localFile = new FileInfo(filePath);
             switch (localFile.Extension)
             {
                 case ".doc":
@@ -60,7 +53,7 @@ namespace PDFBox.Api.Models
                     break;
             }
 
-            localFile = new FileInfo(Path.Combine("~temp", Path.GetFileNameWithoutExtension(file.FileName) + ".pdf"));
+            localFile = new FileInfo(Path.Combine("~temp", Path.GetFileNameWithoutExtension(localFile.Name) + ".pdf"));
             using (var stream = localFile.OpenRead())
             {
                 using (var br = new BinaryReader(stream))

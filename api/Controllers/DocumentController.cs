@@ -133,7 +133,16 @@ namespace PDFBox.Api.Controllers
             if (!Directory.Exists("~temp"))
                 Directory.CreateDirectory("~temp");
             
-            var doc = await Document.Convert(null, file);
+            // Save the uploaded file to the temporary directory
+            var filePath = Path.Combine("~temp", file.FileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            var localFile = new FileInfo(filePath);
+            
+            // Conver the document
+            var doc = Document.Convert(null, localFile);
 
             // Delete the temporary directory since we don't need it anymore
             var dir = new DirectoryInfo("~temp");
@@ -207,7 +216,14 @@ namespace PDFBox.Api.Controllers
                 // Save each file from the HTTP Request Form to the temporary directory
                 foreach (var file in files)
                 {
-                    var doc = await Document.Convert(user, file);
+                    var filePath = Path.Combine("~temp", file.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    var localFile = new FileInfo(filePath);
+
+                    var doc = Document.Convert(user, localFile);
                     await db.Documents.AddAsync(doc);
                 }
 
