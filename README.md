@@ -16,7 +16,7 @@ This project was launched in order to convert Microsoft Office files to PDF form
 
 HTTP Action | API Route | Description
 ----------|----------|------------
-`HTTP POST` | `/api/contact/submit` | API method for submitting contact form data. The API then uses an SMTP client to send the contact form data as an email.
+`HTTP POST` | `/api/contact/submit` | API method for submitting contact form data.
 `HTTP POST` | `/api/users/register` | API method for registering a new user account.
 `HTTP POST` | `/api/users/authenticate` | API method for authenticating a user account.
 `HTTP GET` | `/api/users/all` | API method for getting details about all user accounts.
