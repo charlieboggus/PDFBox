@@ -16,19 +16,19 @@ This project was launched in order to convert Microsoft Office files to PDF form
 
 HTTP Action | API Route | Description
 ----------|----------|------------
-`HTTP POST` | `/api/contact/submit` | API method for submitting contact form data.
-`HTTP POST` | `/api/users/register` | API method for registering a new user account.
-`HTTP POST` | `/api/users/authenticate` | API method for authenticating a user account.
-`HTTP GET` | `/api/users/all` | API method for getting details about all user accounts.
-`HTTP GET` | `/api/users/{ id }` | API method for getting details about a particular user account.
-`HTTP PUT` | `/api/users/{ id }` | API method to update the account details for a particular user account.
+`HTTP POST` | `/api/contact/submit` | API method for submitting contact form data
+`HTTP POST` | `/api/users/register` | API method for registering a new user account
+`HTTP POST` | `/api/users/authenticate` | API method for authenticating a user account
+`HTTP GET` | `/api/users/all` | API method for getting details about all user accounts
+`HTTP GET` | `/api/users/{ id }` | API method for getting details about a particular user account
+`HTTP PUT` | `/api/users/{ id }` | API method to update the account details for a particular user account
 `HTTP DELETE` | `/api/users/{ id }` | API method to delete a particular user account
-`HTTP GET` | `/api/documents/details/all` | API method to get the details of every stored document.
-`HTTP GET` | `/api/documents/details/{ id }` | API method to get the details of a particular document.
-`HTTP GET` | `/api/documents/{ id }` | API method to download a particular stored document.
+`HTTP GET` | `/api/documents/details/all` | API method to get the details of every stored document
+`HTTP GET` | `/api/documents/details/{ id }` | API method to get the details of a particular document
+`HTTP GET` | `/api/documents/{ id }` | API method to download a particular stored document
 `HTTP POST` | `/api/documents/upload` | API method to upload a document
 `HTTP POST` | `/api/documents/convert` | API method to convert a document
-`HTTP DELETE` | `/api/documents/all` | API method to delete all documents associated with a particular user account.
+`HTTP DELETE` | `/api/documents/all` | API method to delete all documents owned by a user
 `HTTP DELETE` | `/api/documents/{ id }` | API method to delete a particular document
 
 # Misc:
