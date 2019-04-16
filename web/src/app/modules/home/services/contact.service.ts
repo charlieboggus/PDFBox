@@ -13,6 +13,6 @@ export class ContactService {
   constructor(private http: HttpClient) { }
 
   submitForm(json: string) {
-    return this.http.post< any >('https://localhost:5001/api/contact/submit', json, this.httpOptions);
+    return this.http.post< any >('https://pdfbox-api.azurewebsites.net/api/contact/submit', json, this.httpOptions);
   }
 }

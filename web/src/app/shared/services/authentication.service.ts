@@ -25,11 +25,11 @@ export class AuthenticationService {
   }
 
   register(username: string, email: string, password: string) {
-    return this.http.post< any >('http://localhost:5000/api/users/register', { username, email, password });
+    return this.http.post< any >('https://pdfbox-api.azurewebsites.net/api/users/register', { username, email, password });
   }
 
   login(username: string, password: string) {
-    return this.http.post< any >('http://localhost:5000/api/users/authenticate', { username, password }).pipe(map(result => {
+    return this.http.post< any >('https://pdfbox-api.azurewebsites.net/api/users/authenticate', { username, password }).pipe(map(result => {
 
       // Login is successful if there's a JWT token in the response
       if(result && result.token) {
@@ -48,7 +48,7 @@ export class AuthenticationService {
   }
 
   changeAccountDetails(username: string, email: string, password: string): void {
-    this.http.put< any >(`http://localhost:5000/api/users/${ this.currentUserSubject.value.id }`, { username, email, password }).subscribe(result => {
+    this.http.put< any >(`https://pdfbox-api.azurewebsites.net/api/users/${ this.currentUserSubject.value.id }`, { username, email, password }).subscribe(result => {
       // Update the localstorage user stuff
       this.logout();
       this.alerts.success(result.message + "Please login using your new credentials.", true);
@@ -59,7 +59,7 @@ export class AuthenticationService {
   }
 
   deleteAccount() {
-    this.http.delete< any >(`http://localhost:5000/api/users/${ this.currentUserSubject.value.id }`)
+    this.http.delete< any >(`https://pdfbox-api.azurewebsites.net/api/users/${ this.currentUserSubject.value.id }`)
       .toPromise()
       .then(result => {
         this.logout();

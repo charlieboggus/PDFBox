@@ -26,7 +26,7 @@ export class DocumentsComponent implements OnInit {
 
   onRefresh() {
     this.documents = [];
-    this.http.get<any>('http://localhost:5000/api/documents/details/all').subscribe(result => {
+    this.http.get<any>('https://pdfbox-api.azurewebsites.net/api/documents/details/all').subscribe(result => {
       for (let i = 0; i < result.length; i++) {
         let entry = result[i];
 
@@ -45,7 +45,7 @@ export class DocumentsComponent implements OnInit {
   }
 
   onDownload(doc: DocumentModel) {
-    this.http.get(`http://localhost:5000/api/documents/${doc.documentId}`, { responseType: 'blob' }).subscribe(data => {
+    this.http.get(`https://pdfbox-api.azurewebsites.net/api/documents/${doc.documentId}`, { responseType: 'blob' }).subscribe(data => {
       var blob = new Blob([data], { type: this.getContentType(doc.extension) });
       saveAs(blob, doc.name);
       this.alerts.success('Successfully downloaded ' + doc.name);
@@ -55,7 +55,7 @@ export class DocumentsComponent implements OnInit {
   }
 
   onDelete(id: number) {
-    this.http.delete<any>(`http://localhost:5000/api/documents/${id}`).subscribe(result => {
+    this.http.delete<any>(`https://pdfbox-api.azurewebsites.net/api/documents/${id}`).subscribe(result => {
       this.alerts.success(result.message);
       this.onRefresh();
     }, error => {
@@ -64,7 +64,7 @@ export class DocumentsComponent implements OnInit {
   }
 
   onDeleteAll() {
-    this.http.delete<any>('http://localhost:5000/api/documents/all').subscribe(result => {
+    this.http.delete<any>('https://pdfbox-api.azurewebsites.net/api/documents/all').subscribe(result => {
       this.alerts.success(result.message);
       this.onRefresh();
     }, error => {

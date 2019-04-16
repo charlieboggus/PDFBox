@@ -40,7 +40,7 @@ export class UploadComponent implements OnInit {
     formData.append('convert', this.convertFiles.toString());
 
     // Post the form data to API
-    this.http.post< any >('http://localhost:5000/api/documents/upload', formData).subscribe(result => {
+    this.http.post< any >('https://pdfbox-api.azurewebsites.net/api/documents/upload', formData).subscribe(result => {
       this.alerts.success(result.message);
       this.uploader.clearQueue();
       this.submitted = false;

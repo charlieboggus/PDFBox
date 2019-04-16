@@ -47,7 +47,7 @@ export class ConvertComponent implements OnInit {
     }
 
     // Post the HTTP request
-    this.http.post('http://localhost:5000/api/documents/convert', formData, { responseType: 'blob' })
+    this.http.post('https://pdfbox-api.azurewebsites.net/api/documents/convert', formData, { responseType: 'blob' })
     .subscribe(result => 
     {
       var blob = new Blob([result], { type: 'application/pdf' });
