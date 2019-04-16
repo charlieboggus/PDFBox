@@ -133,63 +133,16 @@ namespace PDFBox.Api.Controllers
             if (!Directory.Exists("~temp"))
                 Directory.CreateDirectory("~temp");
             
-            // Save the uploaded file to the temp directory
-            var filepath = Path.Combine("~temp", file.FileName);
-            using (var stream = new FileStream(filepath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            // Convert the file
-            var dir = new DirectoryInfo("~temp");
-            var localFiles = dir.GetFiles();
-            foreach (var f in localFiles)
-            {
-                // If the file extension is a Word extension use the convert Word method
-                if (f.Extension == ".doc" || f.Extension == ".docx")
-                    ConvertWordToPdf(f);
-
-                // If the file extension is a PPT extension use the convert PPT method
-                if (f.Extension == ".ppt" || f.Extension == ".pptx")
-                    ConvertPowerPointToPdf(f);
-                    
-                // If the file extension is an Excel extension use the convert Excel method
-                if (f.Extension == ".xls" || f.Extension == ".xlsx")
-                    ConvertExcelToPdf(f);
-
-                // No other file types are supported for conversion to PDF at this time...
-            }
-
-            // Refresh the directory and get all the files in it again and create a new Document object
-            // from the uploaded file
-            dir.Refresh();
-            localFiles = dir.GetFiles();
-            var docs = new List< Document >();
-            using (var stream = localFiles[0].OpenRead())
-            {
-                using (var br = new BinaryReader(stream))
-                {
-                    var doc = new Document
-                    {
-                        Name = localFiles[0].Name,
-                        Extension = localFiles[0].Extension,
-                        Size = localFiles[0].Length,
-                        Data = br.ReadBytes((Int32) stream.Length)
-                    };
-
-                    docs.Add(doc);
-                }
-            }
+            var doc = await Document.Convert(null, file);
 
             // Delete the temporary directory since we don't need it anymore
-            foreach (var f in localFiles)
-            {
+            var dir = new DirectoryInfo("~temp");
+            foreach (var f in dir.GetFiles())
                 System.IO.File.Delete(f.FullName);
-            }
             Directory.Delete(dir.FullName);
 
             // Return the file to client for download
-            return File(docs[0].Data, GetContentType(docs[0].Extension), docs[0].Name);
+            return File(doc.Data, GetContentType(doc.Extension), doc.Name);
         }
 
         // HTTP DELETE: /api/documents/all
@@ -254,71 +207,14 @@ namespace PDFBox.Api.Controllers
                 // Save each file from the HTTP Request Form to the temporary directory
                 foreach (var file in files)
                 {
-                    var filepath = Path.Combine("~temp", file.FileName);
-                    using (var stream = new FileStream(filepath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(stream);
-                    }
-                }
-
-                // Get all the files in the temporary directory & iterate over each of them to try and convert them to PDF
-                var dir = new DirectoryInfo("~temp");
-                var localFiles = dir.GetFiles();
-                foreach (var file in localFiles)
-                {
-                    // If the file extension is a Word extension use the convert Word method
-                    if (file.Extension == ".doc" || file.Extension == ".docx")
-                        ConvertWordToPdf(file);
-
-                    // If the file extension is a PPT extension use the convert PPT method
-                    if (file.Extension == ".ppt" || file.Extension == ".pptx")
-                        ConvertPowerPointToPdf(file);
-                    
-                    // If the file extension is an Excel extension use the convert Excel method
-                    if (file.Extension == ".xls" || file.Extension == ".xlsx")
-                        ConvertExcelToPdf(file);
-
-                    // No other file types are supported for conversion to PDF at this time...
-                }
-
-                // Refresh the directory and get all the files in it again so we can store them in database
-                dir.Refresh();
-                localFiles = dir.GetFiles();
-                foreach (var file in localFiles)
-                {
-                    using (var stream = file.OpenRead())
-                    {
-                        using (var br = new BinaryReader(stream))
-                        {
-                            // Get file info
-                            var filename = file.Name;
-                            var extension = file.Extension;
-                            var size = file.Length;
-                            var data = br.ReadBytes((Int32) stream.Length);
-
-                            // Create a new Document object from file info
-                            var doc = new Document
-                            {
-                                Name = filename,
-                                Extension = extension,
-                                Size = size,
-                                CreationDate = DateTime.Now,
-                                Data = data,
-                                OwnerId = user.UserId,
-                                Owner = user
-                            };
-
-                            // Store the new document object in database
-                            await db.Documents.AddAsync(doc);
-                        }
-                    }
+                    var doc = await Document.Convert(user, file);
+                    await db.Documents.AddAsync(doc);
                 }
 
                 // Delete the temporary directory since we don't need it anymore
-                foreach (var file in localFiles)
-                {
+                var dir = new DirectoryInfo("~temp");
+                foreach (var file in dir.GetFiles())
                     System.IO.File.Delete(file.FullName);
-                }
                 Directory.Delete(dir.FullName);
 
                 // Finally save database changes
@@ -398,116 +294,6 @@ namespace PDFBox.Api.Controllers
 
                 default:            return "text/plain";
             }
-        }
-
-        // <summary>
-        //  Method to convert a given Microsoft Word document (.doc or .docx) to PDF
-        //  using the Microsoft.Office.Interop.Word library
-        // </summary>
-        private void ConvertWordToPdf(FileInfo file)
-        {
-            object missing = System.Reflection.Missing.Value;
-
-            // Initialize the Interop Word Applicaiton for conversion
-            var word = new Microsoft.Office.Interop.Word.Application();
-            word.Visible = false;
-            word.ScreenUpdating = false;
-            word.DisplayAlerts = Microsoft.Office.Interop.Word.WdAlertLevel.wdAlertsNone;
-
-            // Open the word document file
-            Object filename = file.FullName;
-            var doc = word.Documents.Open(
-                ref filename, ref missing, ref missing, ref missing, 
-                ref missing, ref missing, ref missing, ref missing, 
-                ref missing, ref missing, ref missing, ref missing, 
-                ref missing, ref missing, ref missing, ref missing
-            );
-            doc.Activate();
-
-            // Save it as PDF
-            object outfile = file.FullName.Replace(file.Extension, ".pdf");
-            object format = Microsoft.Office.Interop.Word.WdSaveFormat.wdFormatPDF;
-            doc.SaveAs2(
-                ref outfile, ref format, ref missing, ref missing, 
-                ref missing, ref missing, ref missing, ref missing, 
-                ref missing, ref missing, ref missing, ref missing, 
-                ref missing, ref missing, ref missing, ref missing
-            );
-
-            // Close the document and word application
-            object saveChanges = Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges;
-            ((Microsoft.Office.Interop.Word._Document) doc).Close(ref saveChanges, ref missing, ref missing);
-            doc = null;
-
-            ((Microsoft.Office.Interop.Word._Application) word).Quit(ref missing, ref missing, ref missing);
-            word = null;
-
-            // Delete the original file since it's not needed anymore after conversion
-            System.IO.File.Delete(file.FullName);
-        }
-
-        // <summary>
-        //  Method to convert a given Microsoft PowerPoint presentation (.ppt or .pptx) to PDF
-        //  using the Microsoft.Office.Interop.PowerPoint library
-        // </summary>
-        private void ConvertPowerPointToPdf(FileInfo file)
-        {
-            // Initialize Interop PowerPoint Application
-            var app = new Microsoft.Office.Interop.PowerPoint.Application();
-
-            // Open the PPT file
-            var ppt = app.Presentations.Open(file.FullName, Microsoft.Office.Core.MsoTriState.msoTrue, Microsoft.Office.Core.MsoTriState.msoTrue, Microsoft.Office.Core.MsoTriState.msoFalse);
-            
-            // Export the file as PDF
-            var outfile = file.FullName.Replace(file.Extension, ".pdf");
-            ppt.SaveAs(outfile, Microsoft.Office.Interop.PowerPoint.PpSaveAsFileType.ppSaveAsPDF, Microsoft.Office.Core.MsoTriState.msoTrue);
-
-            // Close everything
-            ppt.Close();
-            ppt = null;
-
-            app.Quit();
-            app = null;
-
-            // Delete the original file since it's not needed anymore after conversion
-            System.IO.File.Delete(file.FullName);
-        }
-
-        // <summary>
-        //  Method to convert a given Microsoft Excel workbook to PDF
-        //  using the Microsoft.Office.Interop.Excel library
-        // </summary>
-        private void ConvertExcelToPdf(FileInfo file)
-        {
-            object missing = System.Reflection.Missing.Value;
-
-            // Initialize Interop Excel Application
-            var app = new Microsoft.Office.Interop.Excel.Application();
-            app.Visible = false;
-            app.ScreenUpdating = false;
-            app.DisplayAlerts = false;
-
-            // Open the Excel workbook
-            var xlsx = app.Workbooks.Open(
-                file.FullName, missing, missing, missing, 
-                missing, missing, missing, missing, 
-                missing, missing, missing, missing, 
-                missing, missing, missing
-            );
-
-            // Export the workbook as PDF
-            var outfile = file.FullName.Replace(file.Extension,  ".pdf");
-            xlsx.ExportAsFixedFormat(Microsoft.Office.Interop.Excel.XlFixedFormatType.xlTypePDF, outfile, missing, missing, missing, missing, missing, missing, missing);
-
-            // Close everything
-            xlsx.Close(Microsoft.Office.Interop.Excel.XlSaveAction.xlDoNotSaveChanges, missing, missing);
-            xlsx = null;
-
-            app.Quit();
-            app = null;
-
-            // Delete the original file since it's not needed anymore after conversion
-            System.IO.File.Delete(file.FullName);
         }
     }
 }
