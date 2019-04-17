@@ -1,7 +1,7 @@
 # PDFBox: SP19 AMIS 3610 Group Project
 - **Team Members:** Charlie Boggus, Carson Susich, Kyle Kempf, Kyrne Beauford, Sean Walston
 
-- **Presentation YouTube Video:** [view](#)
+- **Presentation YouTube Video:** [view](https://youtu.be/vbBkJqv8Okc)
 
 - **Project Presentation:** [view](https://docs.google.com/presentation/d/1nXvlwAUlC4b8naXIDQge1ErG8gWHoYxhnVSQ5wy7md0/edit?usp=sharing) or [download](https://github.com/charlieboggus/SP19-AMIS-3610-Group-Project/blob/master/3610%20Presentation.pptx)
 
